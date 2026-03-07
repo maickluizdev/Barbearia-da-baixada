@@ -51,41 +51,26 @@
                     <h2 class="section-title">Nossos Serviços</h2>
                     <div class="services-grid">
                         <div class="service-card">
-                            <div class="service-img">
-                                <img src="corte_social_img_1772903108308.png" alt="Corte Social">
-                            </div>
                             <h3>Corte Social</h3>
                             <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
                         </div>
                         <div class="service-card">
-                            <div class="service-img">
-                                <img src="corte_degrade_img_1772903125491.png" alt="Degradê">
-                            </div>
                             <h3>Degradê</h3>
                             <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
                         </div>
                         <div class="service-card">
-                            <div class="service-img">
-                                <img src="barba_premium_img_1772903244324.png" alt="Barba">
-                            </div>
                             <h3>Barba</h3>
                             <p class="price">R$ 5,00</p>
                             <p class="info">Dê um trato no visual completo.</p>
                         </div>
                         <div class="service-card">
-                            <div class="service-img icon-fallback">
-                                <i class="fas fa-eye"></i>
-                            </div>
                             <h3>Sobrancelha</h3>
                             <p class="price">R$ 5,00</p>
                             <p class="info">O cuidado que faz a diferença.</p>
                         </div>
                         <div class="service-card specialty">
-                            <div class="service-img icon-fallback">
-                                <i class="fas fa-bolt"></i>
-                            </div>
                             <h3>Luzes</h3>
                             <p class="price-negotiate">Preço a combinar</p>
                             <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para fazer Luzes." target="_blank" class="btn-whatsapp-small">
@@ -93,9 +78,6 @@
                             </a>
                         </div>
                         <div class="service-card specialty">
-                            <div class="service-img icon-fallback">
-                                <i class="fas fa-snowflake"></i>
-                            </div>
                             <h3>Platinado</h3>
                             <p class="price-negotiate">Preço a combinar</p>
                             <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para o Platinado." target="_blank" class="btn-whatsapp-small">
@@ -103,9 +85,6 @@
                             </a>
                         </div>
                         <div class="service-card specialty">
-                            <div class="service-img icon-fallback">
-                                <i class="fas fa-brush"></i>
-                            </div>
                             <h3>Pigmentação</h3>
                             <p class="price-negotiate">Preço a combinar</p>
                             <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para Pigmentação." target="_blank" class="btn-whatsapp-small">
@@ -118,17 +97,17 @@
             </section>
         </section>
 
-        <!-- Login / Register Page -->
+        <!-- Auth Page (Full) -->
         <section id="auth" class="page">
             <div class="container auth-container">
                 <div class="auth-box glass">
-                    <div class="auth-tabs">
+                    <div class="auth-tabs" id="auth-tabs">
                         <button id="tab-login" class="active" onclick="app.setAuthTab('login')">Entrar</button>
                         <button id="tab-register" onclick="app.setAuthTab('register')">Cadastrar</button>
                     </div>
                     
                     <form id="login-form">
-                        <h3>Bem-vindo de volta</h3>
+                        <h3 id="auth-title">Bem-vindo de volta</h3>
                         <div class="input-group">
                             <label>Email</label>
                             <input type="email" id="login-email" required placeholder="seu@email.com">
@@ -156,6 +135,10 @@
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
                     </form>
+
+                    <p style="margin-top: 25px; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+                        <a href="#" id="barber-toggle-link" onclick="app.toggleBarberMode(true)" style="color: var(--text-muted); text-decoration: none;">Acesso Administrativo</a>
+                    </p>
                 </div>
             </div>
         </section>
@@ -172,6 +155,7 @@
                                 <select id="book-service" required onchange="app.updatePricePreview()">
                                     <option value="Corte Social">Corte Social</option>
                                     <option value="Degradê">Degradê</option>
+                                    <option value="Pigmentação">Pigmentação</option>
                                 </select>
                             </div>
                             <div class="checkbox-group">
@@ -205,14 +189,23 @@
                             <div class="price-preview">
                                 Total: <span id="preview-total">R$ 20,00</span>
                             </div>
+                            <div class="cancellation-policy">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Se o corte for cancelado em até 3 horas antes do horário marcado, no próximo corte será cobrado 10 reais a mais além do valor do corte.</p>
+                            </div>
                             <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento</button>
                         </form>
                     </div>
                     
                     <div class="my-appointments glass">
-                        <h2>Meus Agendamentos</h2>
+                        <h2>Próximos Agendamentos</h2>
                         <div id="client-appointments-list">
                             <p class="empty-msg">Você ainda não possui agendamentos.</p>
+                        </div>
+
+                        <h2 style="margin-top: 40px;">Meu Histórico de Estilo</h2>
+                        <div id="client-history-list">
+                            <!-- Dynamic history -->
                         </div>
                     </div>
                 </div>
@@ -222,9 +215,10 @@
         <!-- Barber Dashboard -->
         <section id="barber-dashboard" class="page">
             <div class="container">
-                <div class="dashboard-header">
-                    <h2>Painel do Barbeiro</h2>
-                    <div class="stats-grid">
+                <div class="dashboard-header glass">
+                    <h2>Painel Administrativo</h2>
+                    <p>Gerenciamento completo da sua barbearia.</p>
+                    <div class="stats-grid" style="margin-top: 25px;">
                         <div class="stat-card glass gold">
                             <small>Recebido (Hoje)</small>
                             <h3 id="daily-revenue">R$ 0,00</h3>
@@ -242,6 +236,37 @@
                 </div>
 
                 <div id="barber-agenda" class="dashboard-content">
+                    <div class="block-time-form glass" style="margin-bottom: 30px; padding: 20px; border: 1px dashed var(--primary);">
+                        <h3>Bloquear Horário Manualmente</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Use esta opção para reservar horários de almoço ou emergências.</p>
+                        <div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="block-date">
+                            </div>
+                            <div class="input-group">
+                                <label>Hora de Início</label>
+                                <input type="time" id="block-time">
+                            </div>
+                            <div class="input-group">
+                                <label>Duração</label>
+                                <select id="block-duration">
+                                    <option value="30">30 minutos</option>
+                                    <option value="60" selected>1 hora</option>
+                                    <option value="90">1h 30min</option>
+                                    <option value="120">2 horas</option>
+                                </select>
+                            </div>
+                            <div class="input-group" style="grid-column: span 2;">
+                                <label>Motivo (Opcional)</label>
+                                <input type="text" id="block-reason" placeholder="Ex: Almoço, Reunião...">
+                            </div>
+                            <div class="input-group" style="display: flex; align-items: flex-end;">
+                                <button class="btn btn-primary btn-block" onclick="app.blockTime()">Bloquear Horário</button>
+                            </div>
+                        </div>
+                    </div>
+
                     <div class="table-container glass">
                         <table id="agenda-table">
                             <thead>
@@ -290,6 +315,20 @@
                     </div>
 
                     <div class="finance-history glass" style="margin-top: 20px;">
+                        <h3>Gestão de Notificações</h3>
+                        <div class="notification-settings glass" style="background: rgba(255, 255, 255, 0.02); margin-top: 15px; padding: 20px;">
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Defina quando os lembretes automáticos devem ser enviados aos clientes.</p>
+                            <div class="checkbox-group" style="flex-direction: column; gap: 10px;">
+                                <label><input type="checkbox" id="notify-24h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 24 horas antes</label>
+                                <label><input type="checkbox" id="notify-2h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 2 hora antes</label>
+                            </div>
+                            <div id="notification-log" style="margin-top: 20px; font-size: 0.75rem; color: var(--primary); font-family: monospace;">
+                                <!-- Notification logs -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="finance-history glass" style="margin-top: 20px;">
                         <h3>Histórico de Recebimentos por Dia</h3>
                         <div id="finance-list" class="finance-list">
                             <!-- Dynamic content -->
@@ -317,7 +356,7 @@
                             <button onclick="app.copyPix()"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-                    <p class="payment-note">Após realizar a transferência, clique no botão abaixo para confirmar.</p>
+                    <p class="payment-note">Após realizar a transferência, clique no botão abaixo e <strong>envie o comprovante pelo WhatsApp</strong>.</p>
                     <button class="btn btn-primary btn-block" onclick="app.confirmPayment()">Já realizei o pagamento</button>
                     <p class="payment-note" style="margin-top: 10px; font-size: 0.7rem;">* Em ambiente de produção, este pagamento seria verificado automaticamente.</p>
                 </div>

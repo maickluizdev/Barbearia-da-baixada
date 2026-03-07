@@ -104,13 +104,29 @@ body {
 .nav-links a {
     color: var(--text-light);
     text-decoration: none;
-    font-size: 0.9rem;
+    font-size: 0.95rem;
     font-weight: 600;
+    transition: var(--transition);
+    position: relative;
+}
+
+.nav-links a::after {
+    content: '';
+    position: absolute;
+    bottom: -5px;
+    left: 0;
+    width: 0;
+    height: 2px;
+    background: var(--primary);
     transition: var(--transition);
 }
 
 .nav-links a:hover {
     color: var(--primary);
+}
+
+.nav-links a:hover::after {
+    width: 100%;
 }
 
 /* Buttons */
@@ -178,15 +194,17 @@ body {
 
 .hero h1 {
     font-family: 'Playfair Display', serif;
-    font-size: 4rem;
+    font-size: clamp(2.5rem, 8vw, 4.5rem);
     line-height: 1.1;
-    margin-bottom: 20px;
+    margin-bottom: 25px;
+    letter-spacing: -1px;
 }
 
 .hero p {
-    font-size: 1.2rem;
+    font-size: clamp(1rem, 3vw, 1.25rem);
     color: var(--text-muted);
-    margin-bottom: 30px;
+    margin-bottom: 35px;
+    max-width: 600px;
 }
 
 .hero-btns {
@@ -225,8 +243,8 @@ body {
 
 .services-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 30px;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 25px;
 }
 
 .service-card {
@@ -441,6 +459,39 @@ body {
     color: var(--primary);
 }
 
+.header-flex {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 30px;
+}
+
+.header-welcome h2 {
+    font-size: 1.8rem;
+    color: var(--primary);
+}
+
+.inspiration-box {
+    flex: 1;
+    max-width: 450px;
+    padding: 15px 20px;
+    background: rgba(212, 175, 55, 0.05);
+    border: 1px solid rgba(212, 175, 55, 0.2);
+    border-radius: 12px;
+}
+
+@media (max-width: 768px) {
+    .header-flex {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+    .inspiration-box {
+        max-width: 100%;
+        width: 100%;
+    }
+}
+
 .dashboard-tabs {
     display: flex;
     gap: 10px;
@@ -491,8 +542,9 @@ td {
     font-weight: 700;
 }
 
-.status-pending { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
-.status-completed { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+.status-pendente { background: rgba(255, 193, 7, 0.1); color: #ffc107; }
+.status-concluido, .status-concluído { background: rgba(40, 167, 69, 0.1); color: #28a745; }
+.status-pago { background: rgba(0, 123, 255, 0.1); color: #007bff; }
 
 .finance-list {
     display: flex;
@@ -508,13 +560,54 @@ td {
     border-radius: 8px;
 }
 
-/* Responsive */
+/* Responsive Improvements */
 @media (max-width: 992px) {
     .booking-grid {
         grid-template-columns: 1fr;
     }
+    .hero-content {
+        text-align: center;
+        margin: 0 auto;
+    }
+    .hero-btns {
+        justify-content: center;
+    }
+}
+
+@media (max-width: 768px) {
+    .navbar {
+        height: 70px;
+    }
+    .nav-links {
+        display: none; /* Consider adding a mobile menu icon later */
+    }
     .hero h1 {
-        font-size: 3rem;
+        margin-bottom: 20px;
+    }
+    .section-title {
+        font-size: 2rem;
+        margin-bottom: 35px;
+    }
+    .glass {
+        padding: 25px;
+    }
+    .dashboard-header {
+        flex-direction: column;
+        gap: 20px;
+        text-align: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .hero-btns {
+        flex-direction: column;
+        width: 100%;
+    }
+    .btn {
+        width: 100%;
+    }
+    .service-card {
+        padding: 25px;
     }
 }
 
@@ -740,4 +833,55 @@ td {
     .nav-wp span {
         display: none;
     }
+}
+
+/* Cancellation Policy Alert */
+.cancellation-policy {
+    background: rgba(220, 53, 69, 0.1);
+    border: 1px solid rgba(220, 53, 69, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin: 20px 0;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.cancellation-policy i {
+    color: #ff4d4d;
+    font-size: 1.2rem;
+}
+
+.cancellation-policy p {
+    font-size: 0.85rem;
+    color: var(--text-light);
+    line-height: 1.4;
+    margin: 0;
+}
+
+/* Touchup Suggestions */
+.appointment-card.history {
+    border-left: 4px solid #555;
+    opacity: 0.9;
+}
+
+.touchup-suggestion {
+    background: rgba(212, 175, 55, 0.1);
+    border: 1px dashed var(--primary);
+    padding: 12px;
+    margin-top: 15px;
+    border-radius: 12px;
+    animation: touchupPulse 2s infinite;
+}
+
+.touchup-suggestion p {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    margin-bottom: 10px !important;
+}
+
+@keyframes touchupPulse {
+    0% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0.2); }
+    70% { box-shadow: 0 0 0 10px rgba(212, 175, 55, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(212, 175, 55, 0); }
 }

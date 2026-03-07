@@ -7,12 +7,14 @@ const app = {
     
     init: () => {
         app.seedBarber();
+        app.loadNotificationSettings();
         app.renderNav();
         app.setupEventListeners();
         
         // Hide loader
         setTimeout(() => {
             document.getElementById('loader').style.display = 'none';
+            app.checkAndSendReminders();
         }, 1000);
 
         // Initial page
@@ -35,9 +37,13 @@ const app = {
 
     // --- NAVIGATION ---
     showPage: (pageId) => {
-        // Security check for barber dashboard
+        // Security checks
         if (pageId === 'barber-dashboard' && (!app.currentUser || app.currentUser.role !== 'barber')) {
             app.showPage('home');
+            return;
+        }
+        if (pageId === 'booking' && (app.currentUser && app.currentUser.role === 'barber')) {
+            app.showPage('barber-dashboard');
             return;
         }
 
@@ -45,7 +51,10 @@ const app = {
         document.getElementById(pageId).classList.add('active');
         window.scrollTo(0, 0);
         
-        if (pageId === 'booking') app.renderClientAppointments();
+        if (pageId === 'booking') {
+            app.renderClientAppointments();
+            app.renderClientHistory();
+        }
         if (pageId === 'barber-dashboard') app.renderBarberDashboard();
     },
 
@@ -65,6 +74,16 @@ const app = {
         }
         
         nav.innerHTML = html;
+
+        // Hide booking buttons if barber is logged in
+        const bookingBtns = document.querySelectorAll('button[onclick*="booking"]');
+        bookingBtns.forEach(btn => {
+            if (app.currentUser && app.currentUser.role === 'barber') {
+                btn.style.display = 'none';
+            } else {
+                btn.style.display = 'block';
+            }
+        });
     },
 
     scrollTo: (id) => {
@@ -72,6 +91,25 @@ const app = {
     },
 
     // --- AUTH ---
+    toggleBarberMode: (isBarber) => {
+        const tabs = document.getElementById('auth-tabs');
+        const title = document.getElementById('auth-title');
+        const link = document.getElementById('barber-toggle-link');
+        
+        if (isBarber) {
+            tabs.style.display = 'none';
+            title.innerText = 'Acesso do Barbeiro';
+            link.innerText = 'Voltar para Login de Clientes';
+            link.onclick = () => app.toggleBarberMode(false);
+            app.setAuthTab('login');
+        } else {
+            tabs.style.display = 'flex';
+            title.innerText = 'Bem-vindo de volta';
+            link.innerText = 'Acesso Administrativo';
+            link.onclick = () => app.toggleBarberMode(true);
+        }
+    },
+
     setAuthTab: (tab) => {
         document.getElementById('tab-login').classList.toggle('active', tab === 'login');
         document.getElementById('tab-register').classList.toggle('active', tab === 'register');
@@ -95,7 +133,7 @@ const app = {
     },
 
     setupEventListeners: () => {
-        // Login
+        // Login Form (Client & Barber)
         document.getElementById('login-form').onsubmit = (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
@@ -112,7 +150,7 @@ const app = {
             }
         };
 
-        // Register
+        // Register Form
         document.getElementById('register-form').onsubmit = (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
@@ -131,7 +169,7 @@ const app = {
             app.showPage('booking');
         };
 
-        // Booking
+        // Booking Form
         document.getElementById('appointment-form').onsubmit = (e) => {
             e.preventDefault();
             app.createAppointment();
@@ -171,14 +209,22 @@ const app = {
         }
 
         // Base price
-        if (service === 'Corte Social') total = isSunday ? 25 : 20;
-        else if (service === 'Degradê') total = isSunday ? 30 : 25;
+        let basePrice = 0;
+        let isSpecialty = false;
 
-        // Extras
+        if (service === 'Corte Social') basePrice = isSunday ? 25 : 20;
+        else if (service === 'Degradê') basePrice = isSunday ? 30 : 25;
+        else if (['Luzes', 'Platinado', 'Pigmentação'].includes(service)) isSpecialty = true;
+
+        total = basePrice;
         if (addBeard) total += 5;
         if (addEyebrow) total += 5;
 
-        document.getElementById('preview-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        if (isSpecialty) {
+            document.getElementById('preview-total').innerText = "A combinar";
+        } else {
+            document.getElementById('preview-total').innerText = `R$ ${total.toFixed(2).replace('.', ',')}`;
+        }
     },
 
     createAppointment: () => {
@@ -189,12 +235,37 @@ const app = {
         const addEyebrow = document.getElementById('add-eyebrow').checked;
         const address = document.getElementById('book-address').value;
         
-        // Calculate final price
+        // Calculate final price and duration
         const dt = new Date(date + 'T00:00:00');
         const isSun = dt.getDay() === 0;
-        let price = (service === 'Corte Social' ? (isSun ? 25 : 20) : (isSun ? 30 : 25));
-        if (addBeard) price += 5;
-        if (addEyebrow) price += 5;
+        let price = 0;
+        let duration = 45; // Base duration in minutes
+
+        if (service === 'Corte Social') price = isSun ? 25 : 20;
+        else if (service === 'Degradê') price = isSun ? 30 : 25;
+        else { // Specialty
+            price = 0;
+            duration = 60;
+        }
+
+        if (addBeard) { price += 5; duration += 15; }
+        if (addEyebrow) { price += 5; duration += 5; }
+
+        // Rule: Minimum 1h advance booking
+        const now = new Date();
+        const selectedTime = new Date(date + 'T' + time);
+        const oneHourLater = new Date(now.getTime() + (60 * 60 * 1000));
+
+        if (selectedTime < oneHourLater) {
+            alert('Agendamentos devem ser feitos com no mínimo 1 hora de antecedência.');
+            return;
+        }
+
+        // Rule: Check Overlap
+        if (app.isTimeOccupied(date, time, duration, app.editingAppointmentId)) {
+            alert('Este horário (ou o período do serviço) já está ocupado. Por favor, escolha outro.');
+            return;
+        }
 
         if (app.editingAppointmentId) {
             const index = app.appointments.findIndex(a => a.id === app.editingAppointmentId);
@@ -205,6 +276,7 @@ const app = {
                     date,
                     time,
                     price,
+                    duration,
                     isSunday: isSun,
                     address: isSun ? address : 'No salão'
                 };
@@ -220,12 +292,13 @@ const app = {
                 date,
                 time,
                 price,
+                duration,
                 isSunday: isSun,
                 address: isSun ? address : 'No salão',
                 status: 'Pendente'
             };
             app.appointments.push(appointment);
-            alert('Agendamento realizado com sucesso!');
+            alert('Desde já, agradecemos pela preferência, você receberá um aviso no seu E-mail 24 horas e 2 horas antes do seu horário marcado!');
         }
 
         localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
@@ -234,9 +307,29 @@ const app = {
         app.updatePricePreview();
     },
 
+    // --- TIME UTILS ---
+    isTimeOccupied: (date, time, duration, excludeId) => {
+        const start = new Date(date + 'T' + time).getTime();
+        const end = start + (duration * 60 * 1000);
+
+        return app.appointments.some(a => {
+            if (a.id === excludeId) return false;
+            if (a.date !== date) return false;
+            if (a.status === 'Cancelado') return false;
+
+            const aStart = new Date(a.date + 'T' + a.time).getTime();
+            const aDuration = a.duration || 45; // Default if old data
+            const aEnd = aStart + (aDuration * 60 * 1000);
+
+            // Overlap check: (Start A < End B) and (End A > Start B)
+            return (start < aEnd && end > aStart);
+        });
+    },
+
     renderClientAppointments: () => {
+        app.renderClientHistory(); // Keep history in sync
         const list = document.getElementById('client-appointments-list');
-        const myApps = app.appointments.filter(a => a.clientId === app.currentUser.id);
+        const myApps = app.appointments.filter(a => a.clientId === app.currentUser.id && a.status !== 'Concluído');
         
         if (myApps.length === 0) {
             list.innerHTML = `<p class="empty-msg">Você ainda não possui agendamentos.</p>`;
@@ -250,7 +343,7 @@ const app = {
                     <span class="status-badge status-${a.status.toLowerCase()}">${a.status}</span>
                 </div>
                 <p><i class="fas fa-calendar"></i> ${a.date.split('-').reverse().join('/')} às ${a.time}</p>
-                <p><i class="fas fa-money-bill"></i> R$ ${a.price.toFixed(2).replace('.', ',')}</p>
+                <p><i class="fas fa-money-bill"></i> ${a.price > 0 ? `R$ ${a.price.toFixed(2).replace('.', ',')}` : 'Preço a combinar'}</p>
                 ${a.isSunday ? `<p><i class="fas fa-home"></i> ${a.address}</p>` : ''}
                 
                 <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
@@ -264,6 +357,55 @@ const app = {
                 </div>
             </div>
         `).join('');
+    },
+
+    renderClientHistory: () => {
+        const list = document.getElementById('client-history-list');
+        if (!list) return;
+        const history = app.appointments.filter(a => a.clientId === app.currentUser.id && a.status.toLowerCase() === 'concluído');
+        const now = new Date();
+
+        if (history.length === 0) {
+            list.innerHTML = `<p class="empty-msg">Nenhum serviço finalizado ainda.</p>`;
+            return;
+        }
+
+        list.innerHTML = history.sort((a,b) => new Date(b.date) - new Date(a.date)).map(a => {
+            const appDate = new Date(a.date + 'T00:00:00');
+            const diffDays = Math.floor((now - appDate) / (1000 * 60 * 60 * 24));
+            
+            let suggestion = '';
+            // Touch-up logic for Platinado (20 days)
+            if (a.service.includes('Platinado') && diffDays >= 20) {
+                suggestion = `
+                    <div class="touchup-suggestion glass">
+                        <p><i class="fas fa-magic"></i> Já faz ${diffDays} dias que você fez o <strong>Platinado</strong>. Que tal um retoque?</p>
+                        <button class="btn btn-primary" style="font-size: 0.7rem; padding: 5px 10px;" onclick="app.sendTouchupEmail('${a.service}', '${a.date}')">Mandar Lembrete no Gmail</button>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="appointment-card history">
+                    <div style="display:flex; justify-content:space-between">
+                        <h4>${a.service}</h4>
+                        <span class="status-badge status-concluido">Finalizado</span>
+                    </div>
+                    <p><i class="fas fa-calendar"></i> Realizado em ${a.date.split('-').reverse().join('/')}</p>
+                    ${suggestion}
+                </div>
+            `;
+        }).join('');
+    },
+
+    sendTouchupEmail: (service, date) => {
+        const email = app.currentUser.email;
+        const subject = encodeURIComponent(`💡 Hora de cuidar do seu visual - Barbearia da Baixada`);
+        const body = encodeURIComponent(`Olá ${app.currentUser.name}!\n\nPercebemos que já faz 20 dias que você realizou seu ${service} conosco (no dia ${date.split('-').reverse().join('/')}).\n\nQue tal agendar um retoque para manter o estilo impecável?\n\nAgende agora pelo nosso site ou responda este e-mail!\n\nAtenciosamente,\nBarbearia da Baixada 💈`);
+        
+        const mailto = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+        window.open(mailto, '_blank');
+        alert('Abrindo o Gmail para você enviar o lembrete de retoque!');
     },
 
     openPayment: (id) => {
@@ -300,7 +442,12 @@ const app = {
             localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
             app.closePayment();
             app.renderClientAppointments();
-            alert('Pagamento confirmado! Seu horário está garantido.');
+            
+            const wpMsg = encodeURIComponent(`Olá! Acabei de realizar o pagamento do agendamento de ${a.service} para o dia ${a.date.split('-').reverse().join('/')} às ${a.time}. Segue o comprovante.`);
+            const wpLink = `https://wa.me/5573998376471?text=${wpMsg}`;
+            
+            alert('Pagamento registrado! Agora, por favor, envie o comprovante pelo WhatsApp que abrirá a seguir.');
+            window.open(wpLink, '_blank');
         }
     },
 
@@ -360,6 +507,69 @@ const app = {
         app.updatePricePreview();
     },
 
+    // --- NOTIFICATIONS ---
+    loadNotificationSettings: () => {
+        const settings = JSON.parse(localStorage.getItem('barber_notif_settings')) || { n24h: true, n2h: true };
+        const c24h = document.getElementById('notify-24h');
+        const c2h = document.getElementById('notify-2h');
+        if (c24h) c24h.checked = settings.n24h;
+        if (c2h) c2h.checked = settings.n2h;
+    },
+
+    saveNotificationSettings: () => {
+        const settings = {
+            n24h: document.getElementById('notify-24h').checked,
+            n2h: document.getElementById('notify-2h').checked
+        };
+        localStorage.setItem('barber_notif_settings', JSON.stringify(settings));
+    },
+
+    checkAndSendReminders: () => {
+        const now = new Date();
+        const settings = JSON.parse(localStorage.getItem('barber_notif_settings')) || { n24h: true, n2h: true };
+        let sentCount = 0;
+
+        app.appointments.forEach(a => {
+            if (a.status !== 'Pendente' && a.status !== 'Pago') return;
+
+            const appTime = new Date(a.date + 'T' + a.time);
+            const diffMs = appTime - now;
+            const diffHours = diffMs / (1000 * 60 * 60);
+
+            // 24h Reminder
+            if (settings.n24h && diffHours > 0 && diffHours <= 24 && !a.notified24h) {
+                app.simulateEmail(a, '24 horas');
+                a.notified24h = true;
+                sentCount++;
+            }
+
+            // 2h Reminder
+            if (settings.n2h && diffHours > 0 && diffHours <= 2 && !a.notified2h) {
+                app.simulateEmail(a, '2 horas');
+                a.notified2h = true;
+                sentCount++;
+            }
+        });
+
+        if (sentCount > 0) {
+            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+        }
+    },
+
+    simulateEmail: (appointment, window) => {
+        const log = document.getElementById('notification-log');
+        const time = new Date().toLocaleTimeString();
+        const msg = `[${time}] E-mail de lembrete (${window}) enviado para: ${appointment.clientName}`;
+        
+        console.log(`SIMULAÇÃO DE EMAIL: ${msg}`);
+        
+        if (log) {
+            const entry = document.createElement('div');
+            entry.innerText = msg;
+            log.prepend(entry);
+        }
+    },
+
     // --- BARBER DASHBOARD ---
     setBarberTab: (tab) => {
         document.getElementById('tab-agenda').classList.toggle('active', tab === 'agenda');
@@ -383,23 +593,33 @@ const app = {
     },
 
     renderBarberDashboard: () => {
-        const today = new Date().toISOString().split('T')[0];
-        const completedApps = app.appointments.filter(a => a.status === 'Concluído');
+        const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
         
-        // Stats
+        // Filter appointments for today
         const todayApps = app.appointments.filter(a => a.date === today);
-        const todayRevenue = todayApps.filter(a => a.status === 'Concluído' || a.status === 'Pago').reduce((sum, a) => sum + a.price, 0);
         
-        document.getElementById('daily-revenue').innerText = `R$ ${todayRevenue.toFixed(2).replace('.', ',')}`;
-        document.getElementById('daily-count').innerText = todayApps.length;
+        // Calculate revenue (Case-insensitive check for 'Concluído' or 'Pago')
+        const todayRevenue = todayApps
+            .filter(a => a.status.toLowerCase() === 'concluído' || a.status.toLowerCase() === 'pago')
+            .reduce((sum, a) => sum + (a.price || 0), 0);
+        
+        // Update Overview Stats
+        const dailyRevEl = document.getElementById('daily-revenue');
+        const dailyCountEl = document.getElementById('daily-count');
+        if (dailyRevEl) dailyRevEl.innerText = `R$ ${todayRevenue.toFixed(2).replace('.', ',')}`;
+        if (dailyCountEl) dailyCountEl.innerText = todayApps.length;
 
         // Wallet Stats (Today)
-        const todayCuts = todayApps.filter(a => a.status === 'Concluído').length;
-        const todayPixPayments = todayApps.filter(a => a.status === 'Pago' || a.status === 'Concluído').length; // Simplification: assuming non-cash is tracked
+        const todayCuts = todayApps.filter(a => a.status.toLowerCase() === 'concluído').length;
+        const todayPixPayments = todayApps.filter(a => a.status.toLowerCase() === 'pago').length;
 
-        document.getElementById('wallet-today-money').innerText = `R$ ${todayRevenue.toFixed(2).replace('.', ',')}`;
-        document.getElementById('wallet-today-cuts').innerText = todayCuts;
-        document.getElementById('wallet-today-pix').innerText = todayPixPayments;
+        const wMoney = document.getElementById('wallet-today-money');
+        const wCuts = document.getElementById('wallet-today-cuts');
+        const wPix = document.getElementById('wallet-today-pix');
+
+        if (wMoney) wMoney.innerText = `R$ ${todayRevenue.toFixed(2).replace('.', ',')}`;
+        if (wCuts) wCuts.innerText = todayCuts;
+        if (wPix) wPix.innerText = todayPixPayments;
 
         // Agenda
         const tbody = document.getElementById('barber-agenda-body');
@@ -410,10 +630,12 @@ const app = {
                 <td><strong>${a.clientName}</strong></td>
                 <td>${a.service}</td>
                 <td>${a.date.split('-').reverse().join('/')}<br><small>${a.time}</small></td>
-                <td>R$ ${a.price.toFixed(2).replace('.', ',')}</td>
+                <td>${a.price > 0 ? `R$ ${a.price.toFixed(2).replace('.', ',')}` : 'A combinar'}</td>
                 <td><span class="status-badge status-${a.status.toLowerCase()}">${a.status}</span></td>
                 <td>
-                    ${(a.status === 'Pendente' || a.status === 'Pago') ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" onclick="app.completeAppointment('${a.id}')">Concluir</button>` : '<i class="fas fa-check-double" style="color:var(--primary)"></i>'}
+                    ${(a.status === 'Pendente' || a.status === 'Pago') ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" onclick="app.completeAppointment('${a.id}')">Concluir</button>` : ''}
+                    ${a.status === 'Bloqueado' ? `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.7rem; border-color: var(--primary); color: var(--primary);" onclick="app.unblockTime('${a.id}')">Desbloquear</button>` : ''}
+                    ${(a.status === 'Concluído') ? '<i class="fas fa-check-double" style="color:var(--primary)"></i>' : ''}
                 </td>
             </tr>
             ${a.isSunday ? `<tr><td colspan="6" style="background: rgba(212, 175, 55, 0.05); font-size: 0.8rem; border-top: none;"><i class="fas fa-truck"></i> Endereço: ${a.address}</td></tr>` : ''}
@@ -438,6 +660,44 @@ const app = {
                     <strong style="color:var(--primary)">R$ ${total.toFixed(2).replace('.', ',')}</strong>
                 </div>
             `).join('');
+        }
+    },
+
+    blockTime: () => {
+        const date = document.getElementById('block-date').value;
+        const time = document.getElementById('block-time').value;
+        const duration = parseInt(document.getElementById('block-duration').value);
+        const reason = document.getElementById('block-reason').value || 'Bloqueio Manual';
+
+        if (!date || !time) return alert('Selecione data e hora.');
+
+        if (app.isTimeOccupied(date, time, duration)) {
+            return alert('Este horário já está ocupado por um cliente ou outro bloqueio.');
+        }
+
+        const block = {
+            id: Date.now().toString(),
+            clientId: 'barber',
+            clientName: 'BLOQUEIO',
+            service: reason,
+            date,
+            time,
+            price: 0,
+            duration,
+            status: 'Bloqueado'
+        };
+
+        app.appointments.push(block);
+        localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+        app.renderBarberDashboard();
+        alert('Horário bloqueado com sucesso!');
+    },
+
+    unblockTime: (id) => {
+        if (confirm('Deseja realmente desbloquear este horário?')) {
+            app.appointments = app.appointments.filter(a => a.id !== id);
+            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+            app.renderBarberDashboard();
         }
     },
 
