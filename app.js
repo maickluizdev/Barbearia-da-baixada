@@ -60,6 +60,21 @@ const app = {
             app.renderClientHistory();
         }
         if (pageId === 'barber-dashboard') app.renderBarberDashboard();
+
+        // Close mobile menu on page change
+        const nav = document.getElementById('nav-links');
+        if (nav) nav.classList.remove('active');
+    },
+
+    toggleMenu: () => {
+        const nav = document.getElementById('nav-links');
+        nav.classList.toggle('active');
+        const icon = document.querySelector('.menu-toggle i');
+        if (nav.classList.contains('active')) {
+            icon.classList.replace('fa-bars', 'fa-times');
+        } else {
+            icon.classList.replace('fa-times', 'fa-bars');
+        }
     },
 
     renderNav: () => {
@@ -133,6 +148,8 @@ const app = {
         app.currentUser = null;
         localStorage.removeItem('barbearia_user');
         app.renderNav();
+        const nav = document.getElementById('nav-links');
+        if (nav) nav.classList.remove('active');
         app.showPage('home');
     },
 
