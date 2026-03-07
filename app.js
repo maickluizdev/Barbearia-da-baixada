@@ -22,17 +22,21 @@ const app = {
     },
 
     seedBarber: () => {
-        // Create an admin barber if not exists
-        if (!app.users.find(u => u.role === 'barber')) {
+        // Create or update admin barber
+        let barber = app.users.find(u => u.role === 'barber');
+        if (!barber) {
             app.users.push({
                 id: '1',
                 name: 'Mestre da Baixada',
                 email: 'barbeiro@teste.com',
-                password: '123',
+                password: 'barbeiro123',
                 role: 'barber'
             });
-            localStorage.setItem('barbearia_users', JSON.stringify(app.users));
+        } else {
+            // Force update password to barbearia123 as requested
+            barber.password = 'barbeiro123';
         }
+        localStorage.setItem('barbearia_users', JSON.stringify(app.users));
     },
 
     // --- NAVIGATION ---
