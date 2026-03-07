@@ -199,6 +199,7 @@ const app = {
         const dateInput = document.getElementById('book-date').value;
         const addBeard = document.getElementById('add-beard').checked;
         const addEyebrow = document.getElementById('add-eyebrow').checked;
+        const addPigment = document.getElementById('add-pigment').checked;
         
         let total = 0;
         let isSunday = false;
@@ -214,11 +215,12 @@ const app = {
 
         if (service === 'Corte Social') basePrice = isSunday ? 25 : 20;
         else if (service === 'Degradê') basePrice = isSunday ? 30 : 25;
-        else if (['Luzes', 'Platinado', 'Pigmentação'].includes(service)) isSpecialty = true;
+        else if (['Luzes', 'Platinado'].includes(service)) isSpecialty = true;
 
         total = basePrice;
         if (addBeard) total += 5;
         if (addEyebrow) total += 5;
+        if (addPigment) total += 10;
 
         if (isSpecialty) {
             document.getElementById('preview-total').innerText = "A combinar";
@@ -233,6 +235,7 @@ const app = {
         const time = document.getElementById('book-time').value;
         const addBeard = document.getElementById('add-beard').checked;
         const addEyebrow = document.getElementById('add-eyebrow').checked;
+        const addPigment = document.getElementById('add-pigment').checked;
         const address = document.getElementById('book-address').value;
         
         // Calculate final price and duration
@@ -250,6 +253,7 @@ const app = {
 
         if (addBeard) { price += 5; duration += 15; }
         if (addEyebrow) { price += 5; duration += 5; }
+        if (addPigment) { price += 10; duration += 15; }
 
         // Rule: Minimum 1h advance booking
         const now = new Date();
@@ -272,7 +276,7 @@ const app = {
             if (index !== -1) {
                 app.appointments[index] = {
                     ...app.appointments[index],
-                    service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}`,
+                    service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPigment ? ' + Pigmentação' : ''}`,
                     date,
                     time,
                     price,
@@ -288,7 +292,7 @@ const app = {
                 id: Date.now().toString(),
                 clientId: app.currentUser.id,
                 clientName: app.currentUser.name,
-                service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}`,
+                service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPigment ? ' + Pigmentação' : ''}`,
                 date,
                 time,
                 price,
@@ -470,6 +474,7 @@ const app = {
         document.getElementById('book-service').value = serviceBase;
         document.getElementById('add-beard').checked = a.service.includes('Barba');
         document.getElementById('add-eyebrow').checked = a.service.includes('Sobrancelha');
+        document.getElementById('add-pigment').checked = a.service.includes('Pigmentação');
         document.getElementById('book-date').value = a.date;
         document.getElementById('book-time').value = a.time;
         

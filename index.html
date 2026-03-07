@@ -84,15 +84,13 @@
                                 <i class="fab fa-whatsapp"></i> Consultar
                             </a>
                         </div>
-                        <div class="service-card specialty">
+                        <div class="service-card">
                             <h3>Pigmentação</h3>
-                            <p class="price-negotiate">Preço a combinar</p>
-                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para Pigmentação." target="_blank" class="btn-whatsapp-small">
-                                <i class="fab fa-whatsapp"></i> Consultar
-                            </a>
+                            <p class="price">R$ 10,00</p>
+                            <p class="info">Realce o design do seu corte.</p>
                         </div>
                     </div>
-                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio.</p>
+                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado neste dia possui um acréscimo de R$ 5,00.</p>
                 </div>
             </section>
         </section>
@@ -155,12 +153,12 @@
                                 <select id="book-service" required onchange="app.updatePricePreview()">
                                     <option value="Corte Social">Corte Social</option>
                                     <option value="Degradê">Degradê</option>
-                                    <option value="Pigmentação">Pigmentação</option>
                                 </select>
                             </div>
                             <div class="checkbox-group">
                                 <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 5)</label>
                                 <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> + Sobrancelha (R$ 5)</label>
+                                <label><input type="checkbox" id="add-pigment" onchange="app.updatePricePreview()"> + Pigmentação (R$ 10)</label>
                             </div>
                             <div class="input-group">
                                 <label>Data</label>
@@ -191,7 +189,7 @@
                             </div>
                             <div class="cancellation-policy">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <p>Se o corte for cancelado em até 3 horas antes do horário marcado, no próximo corte será cobrado 10 reais a mais além do valor do corte.</p>
+                                <p>Se o corte for cancelado em até 3 horas antes do horário marcado ou o cliente não comparecer, no próximo corte será cobrado 10 reais a mais além do valor do corte.</p>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento</button>
                         </form>
