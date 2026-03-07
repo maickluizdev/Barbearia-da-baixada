@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia da Baixada | Agendamento Premium</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+    <nav class="navbar">
+        <div class="container nav-content">
+            <a href="#" class="logo" onclick="app.showPage('home')">
+                <i class="fas fa-cut"></i> Barbearia da <span>Baixada</span>
+            </a>
+            <ul class="nav-links" id="nav-links">
+                <!-- Dynamic links -->
+            </ul>
+            <a href="https://wa.me/5573998376471" target="_blank" class="nav-wp">
+                <i class="fab fa-whatsapp"></i> <span>(73) 99837-6471</span>
+            </a>
+        </div>
+    </nav>
+
+    <main id="app-container">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <header class="hero">
+                <div class="hero-overlay"></div>
+                <div class="container hero-content">
+                    <h1>Sua melhor versão começa aqui.</h1>
+                    <p>Atendimento exclusivo com horário marcado. Qualidade e estilo no coração da baixada.</p>
+                    <div class="hero-btns">
+                        <button class="btn btn-primary" onclick="app.checkAuth('booking')">Agendar Horário</button>
+                        <button class="btn btn-outline" onclick="app.scrollTo('services')">Ver Preços</button>
+                    </div>
+                </div>
+            </header>
+
+            <section id="services" class="services-section">
+                <div class="container">
+                    <h2 class="section-title">Nossos Serviços</h2>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <div class="service-img">
+                                <img src="corte_social_img_1772903108308.png" alt="Corte Social">
+                            </div>
+                            <h3>Corte Social</h3>
+                            <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
+                            <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-img">
+                                <img src="corte_degrade_img_1772903125491.png" alt="Degradê">
+                            </div>
+                            <h3>Degradê</h3>
+                            <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
+                            <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-img">
+                                <img src="barba_premium_img_1772903244324.png" alt="Barba">
+                            </div>
+                            <h3>Barba</h3>
+                            <p class="price">R$ 5,00</p>
+                            <p class="info">Dê um trato no visual completo.</p>
+                        </div>
+                        <div class="service-card">
+                            <div class="service-img icon-fallback">
+                                <i class="fas fa-eye"></i>
+                            </div>
+                            <h3>Sobrancelha</h3>
+                            <p class="price">R$ 5,00</p>
+                            <p class="info">O cuidado que faz a diferença.</p>
+                        </div>
+                        <div class="service-card specialty">
+                            <div class="service-img icon-fallback">
+                                <i class="fas fa-bolt"></i>
+                            </div>
+                            <h3>Luzes</h3>
+                            <p class="price-negotiate">Preço a combinar</p>
+                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para fazer Luzes." target="_blank" class="btn-whatsapp-small">
+                                <i class="fab fa-whatsapp"></i> Consultar
+                            </a>
+                        </div>
+                        <div class="service-card specialty">
+                            <div class="service-img icon-fallback">
+                                <i class="fas fa-snowflake"></i>
+                            </div>
+                            <h3>Platinado</h3>
+                            <p class="price-negotiate">Preço a combinar</p>
+                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para o Platinado." target="_blank" class="btn-whatsapp-small">
+                                <i class="fab fa-whatsapp"></i> Consultar
+                            </a>
+                        </div>
+                        <div class="service-card specialty">
+                            <div class="service-img icon-fallback">
+                                <i class="fas fa-brush"></i>
+                            </div>
+                            <h3>Pigmentação</h3>
+                            <p class="price-negotiate">Preço a combinar</p>
+                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para Pigmentação." target="_blank" class="btn-whatsapp-small">
+                                <i class="fab fa-whatsapp"></i> Consultar
+                            </a>
+                        </div>
+                    </div>
+                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio.</p>
+                </div>
+            </section>
+        </section>
+
+        <!-- Login / Register Page -->
+        <section id="auth" class="page">
+            <div class="container auth-container">
+                <div class="auth-box glass">
+                    <div class="auth-tabs">
+                        <button id="tab-login" class="active" onclick="app.setAuthTab('login')">Entrar</button>
+                        <button id="tab-register" onclick="app.setAuthTab('register')">Cadastrar</button>
+                    </div>
+                    
+                    <form id="login-form">
+                        <h3>Bem-vindo de volta</h3>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="login-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Senha</label>
+                            <input type="password" id="login-password" required placeholder="••••••••">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+                    </form>
+
+                    <form id="register-form" style="display: none;">
+                        <h3>Crie sua conta</h3>
+                        <div class="input-group">
+                            <label>Nome Completo</label>
+                            <input type="text" id="reg-name" required placeholder="Como podemos te chamar?">
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="reg-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Senha</label>
+                            <input type="password" id="reg-password" required placeholder="Mínimo 6 caracteres">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Page -->
+        <section id="booking" class="page">
+            <div class="container">
+                <div class="booking-grid">
+                    <div class="booking-form glass">
+                        <h2>Marcar Atendimento</h2>
+                        <form id="appointment-form">
+                            <div class="input-group">
+                                <label>Serviço Principal</label>
+                                <select id="book-service" required onchange="app.updatePricePreview()">
+                                    <option value="Corte Social">Corte Social</option>
+                                    <option value="Degradê">Degradê</option>
+                                </select>
+                            </div>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 5)</label>
+                                <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> + Sobrancelha (R$ 5)</label>
+                            </div>
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="book-date" required onchange="app.handleDateChange()">
+                            </div>
+                            <div class="input-group">
+                                <label>Horário</label>
+                                <select id="book-time" required>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                </select>
+                            </div>
+                            <div id="address-container" style="display: none;">
+                                <div class="input-group">
+                                    <label>Endereço para atendimento (Domingo)</label>
+                                    <textarea id="book-address" placeholder="Rua, número, bairro..."></textarea>
+                                </div>
+                            </div>
+                            <div class="price-preview">
+                                Total: <span id="preview-total">R$ 20,00</span>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento</button>
+                        </form>
+                    </div>
+                    
+                    <div class="my-appointments glass">
+                        <h2>Meus Agendamentos</h2>
+                        <div id="client-appointments-list">
+                            <p class="empty-msg">Você ainda não possui agendamentos.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barber Dashboard -->
+        <section id="barber-dashboard" class="page">
+            <div class="container">
+                <div class="dashboard-header">
+                    <h2>Painel do Barbeiro</h2>
+                    <div class="stats-grid">
+                        <div class="stat-card glass gold">
+                            <small>Recebido (Hoje)</small>
+                            <h3 id="daily-revenue">R$ 0,00</h3>
+                        </div>
+                        <div class="stat-card glass">
+                            <small>Cortes para Hoje</small>
+                            <h3 id="daily-count">0</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tabs">
+                    <button id="tab-agenda" class="active" onclick="app.setBarberTab('agenda')">Agenda da Semana</button>
+                    <button id="tab-wallet" onclick="app.setBarberTab('wallet')">Minha Carteira</button>
+                </div>
+
+                <div id="barber-agenda" class="dashboard-content">
+                    <div class="table-container glass">
+                        <table id="agenda-table">
+                            <thead>
+                                <tr>
+                                    <th>Ciente</th>
+                                    <th>Serviço</th>
+                                    <th>Data/Hora</th>
+                                    <th>Preço</th>
+                                    <th>Status</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barber-agenda-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="barber-wallet" class="dashboard-content" style="display: none;">
+                    <div class="wallet-grid">
+                        <div class="wallet-stats glass">
+                            <h3>Resumo de Hoje</h3>
+                            <div class="wallet-stat-row">
+                                <span>Total Recebido:</span>
+                                <strong id="wallet-today-money">R$ 0,00</strong>
+                            </div>
+                            <div class="wallet-stat-row">
+                                <span>Cortes Realizados:</span>
+                                <strong id="wallet-today-cuts">0</strong>
+                            </div>
+                            <div class="wallet-stat-row">
+                                <span>Pagamentos via PIX:</span>
+                                <strong id="wallet-today-pix">0</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="wallet-pix-info glass">
+                            <h3>Minha Chave PIX</h3>
+                            <p>Esta é a chave exibida para os clientes no momento do pagamento.</p>
+                            <div class="input-group">
+                                <input type="text" id="barber-pix-key-input" value="00020126330014BR.GOV.BCB.PIX..." onchange="app.updateBarberPixKey()">
+                                <small>Altere aqui para atualizar a chave para os clientes.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="finance-history glass" style="margin-top: 20px;">
+                        <h3>Histórico de Recebimentos por Dia</h3>
+                        <div id="finance-list" class="finance-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Modal -->
+        <div id="payment-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content glass">
+                <button class="modal-close" onclick="app.closePayment()">&times;</button>
+                <h3>Finalizar Pagamento</h3>
+                <div class="payment-details">
+                    <p>Valor total: <strong id="pay-total">R$ 0,00</strong></p>
+                    <div class="pix-area">
+                        <p>Pagamento via <strong>PIX</strong></p>
+                        <div class="qr-placeholder">
+                            <i class="fas fa-qrcode"></i>
+                            <p>QR Code Simulado</p>
+                        </div>
+                        <div class="copy-paste">
+                            <input type="text" id="pix-key" value="00020126330014BR.GOV.BCB.PIX..." readonly>
+                            <button onclick="app.copyPix()"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <p class="payment-note">Após realizar a transferência, clique no botão abaixo para confirmar.</p>
+                    <button class="btn btn-primary btn-block" onclick="app.confirmPayment()">Já realizei o pagamento</button>
+                    <p class="payment-note" style="margin-top: 10px; font-size: 0.7rem;">* Em ambiente de produção, este pagamento seria verificado automaticamente.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Barbearia da Baixada. Todos os direitos reservados.</p>
+            <div class="footer-contact">
+                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Agende pelo WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/5573998376471" target="_blank" class="whatsapp-float">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <script src="app.js"></script>
+</body>
+</html>
