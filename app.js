@@ -963,7 +963,10 @@ const app = {
                 <td>${a.price > 0 ? `R$ ${a.price.toFixed(2).replace('.', ',')}` : 'A combinar'}</td>
                 <td><span class="status-badge status-${a.status.toLowerCase()}">${a.status}</span></td>
                 <td>
-                    ${(a.status === 'Pendente' || a.status === 'Pago') ? `<button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" onclick="app.completeAppointment('${a.id}')">Concluir</button>` : ''}
+                    ${(a.status === 'Pendente' || a.status === 'Pago') ? `
+                        <button class="btn btn-primary" style="padding: 5px 10px; font-size: 0.7rem;" onclick="app.completeAppointment('${a.id}')">Concluir</button>
+                        <button class="btn" style="padding: 5px 10px; font-size: 0.7rem; background:rgba(220, 53, 69, 0.1); color:#ff4d4d; border:1px solid #ff4d4d;" onclick="app.cancelByBarber('${a.id}')">Cancelar</button>
+                    ` : ''}
                     ${a.status === 'Bloqueado' ? `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.7rem; border-color: var(--primary); color: var(--primary);" onclick="app.unblockTime('${a.id}')">Desbloquear</button>` : ''}
                     ${(a.status === 'Concluído') ? '<i class="fas fa-check-double" style="color:var(--primary)"></i>' : ''}
                 </td>
