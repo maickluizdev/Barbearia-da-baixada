@@ -968,7 +968,10 @@ const app = {
                         <button class="btn" style="padding: 5px 10px; font-size: 0.7rem; background:rgba(220, 53, 69, 0.1); color:#ff4d4d; border:1px solid #ff4d4d;" onclick="app.cancelByBarber('${a.id}')">Cancelar</button>
                     ` : ''}
                     ${a.status === 'Bloqueado' ? `<button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.7rem; border-color: var(--primary); color: var(--primary);" onclick="app.unblockTime('${a.id}')">Desbloquear</button>` : ''}
-                    ${(a.status === 'Concluído') ? '<i class="fas fa-check-double" style="color:var(--primary)"></i>' : ''}
+                    ${(a.status === 'Concluído') ? '<i class="fas fa-check-double" style="color:var(--primary); margin-right: 5px;"></i>' : ''}
+                    <button class="btn" style="padding: 5px 10px; font-size: 0.7rem; background: rgba(255, 255, 255, 0.05); color: #a0a0a0; border: 1px solid rgba(255, 255, 255, 0.1);" onclick="app.deleteByBarber('${a.id}')" title="Excluir Permanentemente">
+                        <i class="fas fa-trash-alt"></i>
+                    </button>
                 </td>
             </tr>
             ${a.issunday ? `<tr><td colspan="6" style="background: rgba(212, 175, 55, 0.05); font-size: 0.8rem; border-top: none;"><i class="fas fa-truck"></i> Endereço: ${a.address}</td></tr>` : ''}
@@ -1083,6 +1086,38 @@ const app = {
         }
     },
 
+    cancelByBarber: async (id) => {
+        const appointment = app.appointments.find(a => a.id === id);
+        if (!appointment) return;
+
+        if (confirm(`Deseja realmente cancelar o agendamento de ${appointment.clientname}?`)) {
+            try {
+                app.showToast('Cancelando...');
+                const { error } = await db.from('appointments').update({ status: 'Cancelado' }).eq('id', id);
+                if (error) throw error;
+                
+                // Busca o email do cliente
+                const client = app.users.find(u => u.id === appointment.clientid);
+                
+                await app.syncData();
+                app.renderBarberDashboard();
+                app.showToast('Agendamento cancelado!');
+
+                if (client && client.email) {
+                    const subject = encodeURIComponent('⚠️ Aviso de Cancelamento - Barbearia da Baixada');
+                    const body = encodeURIComponent(`Olá ${client.name.split(' ')[0]}!\n\nInfelizmente precisamos cancelar o seu agendamento de ${appointment.service} marcado para o dia ${appointment.date.split('-').reverse().join('/')} às ${appointment.time}.\n\nPedimos desculpas pelo transtorno. Por favor, acesse nosso site e escolha um novo horário que seja melhor para você!\n\nAtt,\nBarbearia da Baixada 💈`);
+                    
+                    const mailto = `https://mail.google.com/mail/?view=cm&fs=1&to=${client.email}&su=${subject}&body=${body}`;
+                    window.open(mailto, '_blank');
+                    app.showToast('Agendamento cancelado! Notificando cliente...');
+                }
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao cancelar.');
+            }
+        }
+    },
+
     completeAppointment: async (id) => {
         try {
             app.showToast('Concluindo...');
@@ -1095,6 +1130,26 @@ const app = {
         } catch (err) {
             console.error(err);
             app.showToast('Erro ao concluir serviço.');
+        }
+    },
+
+    deleteByBarber: async (id) => {
+        const appointment = app.appointments.find(a => a.id === id);
+        if (!appointment) return;
+
+        if (confirm(`⚠️ EXCLUSÃO PERMANENTE\n\nDeseja realmente apagar o registro de ${appointment.clientname} do sistema?\n\nEsta ação não pode ser desfeita.`)) {
+            try {
+                app.showToast('Excluindo...');
+                const { error } = await db.from('appointments').delete().eq('id', id);
+                if (error) throw error;
+
+                await app.syncData();
+                app.renderBarberDashboard();
+                app.showToast('Registro excluído permanentemente.');
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao excluir registro.');
+            }
         }
     }
 };
