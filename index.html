@@ -294,6 +294,7 @@
                 <div class="dashboard-tabs">
                     <button id="tab-agenda" class="active" onclick="app.setBarberTab('agenda')">Agenda da Semana</button>
                     <button id="tab-wallet" onclick="app.setBarberTab('wallet')">Minha Carteira</button>
+                    <button id="tab-clients" onclick="app.setBarberTab('clients')">Meus Clientes</button>
                 </div>
 
                 <div id="barber-agenda" class="dashboard-content">
@@ -347,6 +348,22 @@
                     </div>
                 </div>
 
+                <div id="barber-clients" class="dashboard-content" style="display: none;">
+                    <div class="table-container glass">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>Ações</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barber-clients-body">
+                                <!-- Dynamic clients list -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
                 <div id="barber-wallet" class="dashboard-content" style="display: none;">
                     <div class="wallet-grid">
                         <div class="wallet-stats glass">

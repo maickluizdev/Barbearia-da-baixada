@@ -726,9 +726,29 @@ const app = {
 
     copyPix: () => {
         const pix = document.getElementById('pix-key');
-        pix.select();
-        document.execCommand('copy');
-        app.showToast('Código PIX copiado!');
+        
+        // Versão moderna para mobile e desktop
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(pix.value).then(() => {
+                app.showToast('✅ Código PIX copiado!');
+            }).catch(err => {
+                console.error('Erro ao copiar:', err);
+                app.fallbackCopy(pix);
+            });
+        } else {
+            app.fallbackCopy(pix);
+        }
+    },
+
+    fallbackCopy: (el) => {
+        el.select();
+        el.setSelectionRange(0, 99999); // Para mobile
+        try {
+            document.execCommand('copy');
+            app.showToast('✅ Código PIX copiado!');
+        } catch (err) {
+            app.showToast('❌ Erro ao copiar. Tente selecionar e copiar manualmente.');
+        }
     },
 
     confirmPayment: () => {
@@ -881,9 +901,11 @@ const app = {
     setBarberTab: (tab) => {
         document.getElementById('tab-agenda').classList.toggle('active', tab === 'agenda');
         document.getElementById('tab-wallet').classList.toggle('active', tab === 'wallet');
+        document.getElementById('tab-clients').classList.toggle('active', tab === 'clients');
 
         document.getElementById('barber-agenda').style.display = tab === 'agenda' ? 'block' : 'none';
         document.getElementById('barber-wallet').style.display = tab === 'wallet' ? 'block' : 'none';
+        document.getElementById('barber-clients').style.display = tab === 'clients' ? 'block' : 'none';
 
         if (tab === 'wallet') {
             const savedPixKey = app.storage.get('barber_pix_key', null);
@@ -948,7 +970,40 @@ const app = {
             ${a.issunday ? `<tr><td colspan="6" style="background: rgba(212, 175, 55, 0.05); font-size: 0.8rem; border-top: none;"><i class="fas fa-truck"></i> Endereço: ${a.address}</td></tr>` : ''}
         `).join('');
 
-        // Finance
+        // Finance history
+        app.renderFinanceHistory();
+
+        // New Clients List
+        app.renderBarberClients();
+    },
+
+    renderBarberClients: () => {
+        const tbody = document.getElementById('barber-clients-body');
+        if (!tbody) return;
+
+        // Filtra para mostrar apenas clientes (não mostra o próprio barbeiro)
+        const clients = app.users.filter(u => u.role === 'client');
+
+        if (clients.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="3" style="text-align:center; padding:20px;">Nenhum cliente cadastrado ainda.</td></tr>';
+            return;
+        }
+
+        tbody.innerHTML = clients.map(u => `
+            <tr>
+                <td><strong>${u.name}</strong></td>
+                <td>${u.email}</td>
+                <td>
+                    <a href="https://wa.me/?text=Olá ${u.name.split(' ')[0]}! Aqui é da Barbearia da Baixada..." target="_blank" class="btn" style="padding: 5px 10px; font-size: 0.7rem; background:rgba(37, 211, 102, 0.2); color:#25d366; border:1px solid #25d366;">
+                        <i class="fab fa-whatsapp"></i> Contato
+                    </a>
+                </td>
+            </tr>
+        `).join('');
+    },
+
+    // Finance
+    renderFinanceHistory: () => {
         const financeList = document.getElementById('finance-list');
         const completed = app.appointments.filter(a => a.status === 'Concluído');
 
