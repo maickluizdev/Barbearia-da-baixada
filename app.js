@@ -711,7 +711,7 @@ const app = {
         document.getElementById('pay-total').innerText = `R$ ${a.price.toFixed(2).replace('.', ',')}`;
 
         // Use barber's custom PIX key if available
-        const defaultKey = "http://qr.mercadopago.com/instore/ol/v2/rYyRv81QQ0UU8nFHOJ1v5204000053039865802BR5914vinicius";
+        const defaultKey = "09613543562";
         const savedPixKey = app.storage.get('barber_pix_key', defaultKey);
         if (savedPixKey) {
             document.getElementById('pix-key').value = savedPixKey;
