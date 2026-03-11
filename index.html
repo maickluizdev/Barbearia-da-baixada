@@ -426,7 +426,8 @@
                     <div class="pix-area">
                         <p>Pagamento via <strong>PIX</strong></p>
                         <div class="qr-container" style="background: white; padding: 15px; border-radius: 12px; margin: 20px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <img src="pix_qr_code.jpg" alt="PIX QR Code" style="width: 200px; height: 200px; display: block;">
+                            <!-- Gerador de QR Code com URL codificada para evitar falhas de leitura -->
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=http%3A%2F%2Fqr.mercadopago.com%2Finstore%2Fol%2Fv2%2FrYyRv81QQ0UU8nFHOJ1v5204000053039865802BR5914vinicius" alt="PIX QR Code" style="width: 200px; height: 200px; display: block;">
                         </div>
                         <div class="copy-paste">
                             <input type="text" id="pix-key" value="http://qr.mercadopago.com/instore/ol/v2/rYyRv81QQ0UU8nFHOJ1v5204000053039865802BR5914vinicius" readonly>
