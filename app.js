@@ -1,42 +1,205 @@
+// --- SUPABASE CONFIG ---
+const supabaseUrl = 'https://rhpmuyjqfqzxsstsqnez.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJocG11eWpxZnF6eHNzdHNxbmV6Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI5MjE4MTIsImV4cCI6MjA4ODQ5NzgxMn0.s29pH_q2EBINgIxcMQigToAqyWFt14x6L5iQSu27ntg';
+let db = null; // Inicializado no init
+
 const app = {
-    currentUser: JSON.parse(localStorage.getItem('barbearia_user')) || null,
-    users: JSON.parse(localStorage.getItem('barbearia_users')) || [],
-    appointments: JSON.parse(localStorage.getItem('barbearia_appointments')) || [],
+    // Funções auxiliares para Storage Seguro (Evita erro de Tracking Prevention)
+    storage: {
+        get: (key, defaultValue) => {
+            try {
+                const val = localStorage.getItem(key);
+                return val ? JSON.parse(val) : defaultValue;
+            } catch (e) {
+                console.warn('Storage bloqueado:', e.message);
+                return defaultValue;
+            }
+        },
+        set: (key, val) => {
+            try {
+                localStorage.setItem(key, JSON.stringify(val));
+            } catch (e) {
+                console.warn('Erro ao salvar no storage:', e.message);
+            }
+        }
+    },
+
+    currentUser: null,
+    users: [],
+    appointments: [],
     editingAppointmentId: null,
     currentPaymentId: null,
-    
-    init: () => {
-        app.seedBarber();
+
+    // Função para checar a conexão (Saber se deu certo)
+    checkConnection: async () => {
+        if (!db) return false;
+        try {
+            const { data, error } = await db.from('users').select('count', { count: 'exact', head: true });
+            if (error) {
+                console.error('Erro ao conectar no banco:', error.message);
+                return false;
+            }
+            console.log('✅ Conexão com Supabase estabelecida com sucesso!');
+            return true;
+        } catch (e) {
+            console.error('Falha crítica na conexão:', e.message);
+            return false;
+        }
+    },
+
+    showToast: (msg) => {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast';
+        toast.innerText = msg;
+        container.appendChild(toast);
+
+        // Trigger show
+        setTimeout(() => toast.classList.add('show'), 10);
+
+        // Remove after 4s
+        setTimeout(() => {
+            toast.classList.remove('show');
+            setTimeout(() => toast.remove(), 400);
+        }, 4000);
+    },
+
+    init: async () => {
+        // Carrega sessão local (para manter logado)
+        app.currentUser = app.storage.get('barbearia_user', null);
+
+        // Inicializa o banco com segurança
+        if (typeof supabase !== 'undefined') {
+            db = supabase.createClient(supabaseUrl, supabaseKey);
+        } else {
+            console.error('Erro: SDK do Supabase não carregou!');
+            setTimeout(() => app.showToast('Erro: Não foi possível conectar ao servidor de dados.'), 1000);
+            return;
+        }
+
+        app.setupEventListeners();
+        await app.syncData(); // Sincroniza usuários e agendamentos do banco
+        await app.checkLicense(); // Verifica se a mensalidade está paga
         app.loadNotificationSettings();
         app.renderNav();
-        app.setupEventListeners();
-        
-        // Hide loader
+
         setTimeout(() => {
             document.getElementById('loader').style.display = 'none';
             app.checkAndSendReminders();
         }, 1000);
 
-        // Initial page
         app.showPage('home');
     },
 
-    seedBarber: () => {
-        // Create or update admin barber
-        let barber = app.users.find(u => u.role === 'barber');
-        if (!barber) {
-            app.users.push({
-                id: '1',
-                name: 'Mestre da Baixada',
-                email: 'barbeiro@teste.com',
-                password: 'barbeiro123',
-                role: 'barber'
-            });
-        } else {
-            // Force update password to barbearia123 as requested
-            barber.password = 'barbeiro123';
+    // Função para buscar tudo do banco de dados
+    syncData: async () => {
+        if (!db) return;
+        try {
+            // Busca usuários
+            const { data: usersData, error: uError } = await db.from('users').select('*');
+            if (uError) throw uError;
+            app.users = usersData || [];
+
+            // Busca agendamentos
+            const { data: appoData, error: aError } = await db.from('appointments').select('*');
+            if (aError) throw aError;
+            app.appointments = appoData || [];
+
+            // Se for barbeiro, o banco sempre garante o admin. Localmente garantimos aqui:
+            app.seedBarber(); 
+
+            console.log('🔄 Dados sincronizados com Supabase');
+        } catch (e) {
+            console.error('Erro na sincronização:', e.message);
+            // Fallback para storage local se o banco falhar
+            app.users = app.storage.get('barbearia_users', []);
+            app.appointments = app.storage.get('barbearia_appointments', []);
         }
-        localStorage.setItem('barbearia_users', JSON.stringify(app.users));
+
+        // Garante que o administrador existe no banco
+        await app.seedBarber();
+    },
+
+    checkLicense: async () => {
+        if (!db) return;
+        try {
+            // Busca o status e a data de vencimento na tabela 'config'
+            const { data, error } = await db.from('config').select('key, value');
+            
+            if (error) throw error;
+
+            const status = data.find(i => i.key === 'subscription_status')?.value;
+            const dueDate = data.find(i => i.key === 'next_payment_date')?.value;
+
+            // Atualiza a data na interface se o elemento existir
+            const dateEl = document.getElementById('payment-due-date');
+            if (dateEl && dueDate) {
+                dateEl.innerText = dueDate;
+            }
+            
+            // Se estiver inativo, bloqueia o site
+            if (status !== 'active') {
+                app.lockSystem();
+            }
+        } catch (e) {
+            console.error('Erro na licença:', e.message);
+        }
+    },
+
+    lockSystem: () => {
+        // Cria uma tela de bloqueio total que sobrepõe tudo
+        const lock = document.createElement('div');
+        lock.id = 'system-lock';
+        lock.style = `
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #0a0a0a; color: white; z-index: 99999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            text-align: center; padding: 20px; font-family: 'Montserrat', sans-serif;
+        `;
+        lock.innerHTML = `
+            <i class="fas fa-exclamation-triangle" style="font-size: 4rem; color: #D4AF37; margin-bottom: 20px;"></i>
+            <h1 style="font-size: 1.8rem; margin-bottom: 15px;">Sistema Temporariamente Suspenso</h1>
+            <p style="color: #a0a0a0; max-width: 400px; line-height: 1.6; margin-bottom: 30px;">
+                Para restabelecer o acesso ao agendamento e ao painel administrativo, por favor, entre em contato com o suporte técnico.
+            </p>
+            <a href="https://wa.me/5573998376471?text=Olá! Meu sistema foi suspenso. Gostaria de regularizar o acesso." 
+               target="_blank" class="btn btn-primary" style="text-decoration: none;">
+               Falar com Suporte
+            </a>
+        `;
+        document.body.appendChild(lock);
+        // Desativa interações
+        document.body.style.overflow = 'hidden';
+    },
+
+    seedBarber: async () => {
+        const masterEmail = 'barbeiro@teste.com';
+        const masterPass = 'barbeiro123';
+        
+        // Verifica se o admin já existe no banco de dados pela lista local carregada
+        let barber = app.users.find(u => u.role === 'barber');
+        
+        if (!barber) {
+            // Se não existe, tenta cadastrar no Supabase
+            const { data, error } = await db.from('users').insert([{
+                name: 'Mestre da Baixada',
+                email: masterEmail,
+                password: masterPass,
+                role: 'barber'
+            }]).select();
+            
+            if (!error && data) {
+                app.users.push(data[0]);
+                console.log('👑 Admin criado no Supabase');
+            }
+        } else if (barber.password !== masterPass) {
+            // Se a senha mudou, atualiza no banco
+            const { error } = await db.from('users').update({ password: masterPass }).eq('email', masterEmail);
+            if (!error) {
+                barber.password = masterPass;
+                console.log('👑 Senha do Admin atualizada');
+            }
+        }
     },
 
     // --- NAVIGATION ---
@@ -54,7 +217,7 @@ const app = {
         document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
         document.getElementById(pageId).classList.add('active');
         window.scrollTo(0, 0);
-        
+
         if (pageId === 'booking') {
             app.renderClientAppointments();
             app.renderClientHistory();
@@ -80,7 +243,7 @@ const app = {
     renderNav: () => {
         const nav = document.getElementById('nav-links');
         let html = `<li><a href="#" onclick="app.showPage('home')">Início</a></li>`;
-        
+
         if (app.currentUser) {
             if (app.currentUser.role === 'barber') {
                 html += `<li><a href="#" onclick="app.showPage('barber-dashboard')">Painel</a></li>`;
@@ -91,7 +254,7 @@ const app = {
         } else {
             html += `<li><a href="#" class="btn btn-primary" onclick="app.showPage('auth')">Entrar</a></li>`;
         }
-        
+
         nav.innerHTML = html;
 
         // Hide booking buttons if barber is logged in
@@ -106,7 +269,8 @@ const app = {
     },
 
     scrollTo: (id) => {
-        document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        const el = document.getElementById(id);
+        if (el) el.scrollIntoView({ behavior: 'smooth' });
     },
 
     // --- AUTH ---
@@ -114,7 +278,7 @@ const app = {
         const tabs = document.getElementById('auth-tabs');
         const title = document.getElementById('auth-title');
         const link = document.getElementById('barber-toggle-link');
-        
+
         if (isBarber) {
             tabs.style.display = 'none';
             title.innerText = 'Acesso do Barbeiro';
@@ -134,6 +298,62 @@ const app = {
         document.getElementById('tab-register').classList.toggle('active', tab === 'register');
         document.getElementById('login-form').style.display = tab === 'login' ? 'block' : 'none';
         document.getElementById('register-form').style.display = tab === 'register' ? 'block' : 'none';
+        document.getElementById('recovery-form').style.display = tab === 'recovery' ? 'block' : 'none';
+        
+        // Reset recovery steps if changing tabs
+        if (tab !== 'recovery') {
+            document.getElementById('recovery-step-1').style.display = 'block';
+            document.getElementById('recovery-step-2').style.display = 'none';
+            document.getElementById('recovery-form').reset();
+        }
+    },
+
+    forgotPassword: () => {
+        app.setAuthTab('recovery');
+    },
+
+    tempRecovery: { code: null, user: null },
+
+    sendRecoveryCode: async () => {
+        const email = document.getElementById('recovery-email').value;
+        if (!email) return app.showToast('Digite seu e-mail.');
+
+        try {
+            app.showToast('Buscando conta...');
+            const { data, error } = await db.from('users').select('*').eq('email', email);
+            if (error) throw error;
+
+            if (data && data.length > 0) {
+                const user = data[0];
+                const code = Math.floor(100000 + Math.random() * 900000).toString();
+                app.tempRecovery = { code, user };
+
+                const subject = encodeURIComponent('🔑 Código de Recuperação - Barbearia da Baixada');
+                const body = encodeURIComponent(`Olá ${user.name}!\n\nSeu código de recuperação é: ${code}\n\nDigite este código no site para acessar sua conta.\n\nAtenciosamente,\nBarbearia da Baixada 💈`);
+                const mailto = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
+                
+                window.open(mailto, '_blank');
+                
+                document.getElementById('recovery-step-1').style.display = 'none';
+                document.getElementById('recovery-step-2').style.display = 'block';
+                app.showToast('Código enviado! Verifique seu Gmail.');
+            } else {
+                app.showToast('E-mail não cadastrado.');
+            }
+        } catch (err) {
+            console.error(err);
+            app.showToast('Erro ao buscar conta.');
+        }
+    },
+
+    verifyRecoveryCode: () => {
+        const input = document.getElementById('recovery-code-input').value;
+        if (input === app.tempRecovery.code) {
+            alert(`✅ Código Confirmado!\n\nSua senha atual é: ${app.tempRecovery.user.password}\n\nAnote em um lugar seguro!`);
+            app.setAuthTab('login');
+        } else {
+            app.showToast('Código incorreto. Verifique o Gmail.');
+        }
     },
 
     checkAuth: (pageToRedirect) => {
@@ -146,7 +366,7 @@ const app = {
 
     logout: () => {
         app.currentUser = null;
-        localStorage.removeItem('barbearia_user');
+        app.storage.set('barbearia_user', null);
         app.renderNav();
         const nav = document.getElementById('nav-links');
         if (nav) nav.classList.remove('active');
@@ -155,39 +375,61 @@ const app = {
 
     setupEventListeners: () => {
         // Login Form (Client & Barber)
-        document.getElementById('login-form').onsubmit = (e) => {
+        document.getElementById('login-form').onsubmit = async (e) => {
             e.preventDefault();
             const email = document.getElementById('login-email').value;
             const pass = document.getElementById('login-password').value;
-            
-            const user = app.users.find(u => u.email === email && u.password === pass);
-            if (user) {
-                app.currentUser = user;
-                localStorage.setItem('barbearia_user', JSON.stringify(user));
-                app.renderNav();
-                app.showPage(user.role === 'barber' ? 'barber-dashboard' : 'booking');
-            } else {
-                alert('Email ou senha incorretos.');
+
+            app.showToast('Verificando...');
+
+            try {
+                const { data: users, error } = await db.from('users').select('*').eq('email', email).eq('password', pass);
+                if (error) throw error;
+
+                const user = users[0];
+                if (user) {
+                    app.currentUser = user;
+                    app.storage.set('barbearia_user', user);
+                    app.renderNav();
+                    app.showToast(`Bem-vindo, ${user.name.split(' ')[0]}!`);
+                    app.showPage(user.role === 'barber' ? 'barber-dashboard' : 'booking');
+                } else {
+                    app.showToast('E-mail ou senha incorretos.');
+                }
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao conectar. Tente novamente.');
             }
         };
 
         // Register Form
-        document.getElementById('register-form').onsubmit = (e) => {
+        document.getElementById('register-form').onsubmit = async (e) => {
             e.preventDefault();
             const name = document.getElementById('reg-name').value;
             const email = document.getElementById('reg-email').value;
             const pass = document.getElementById('reg-password').value;
 
-            if (app.users.find(u => u.email === email)) return alert('Email já cadastrado.');
+            if (app.users.find(u => u.email === email)) {
+                return app.showToast('Este e-mail já está cadastrado.');
+            }
 
-            const newUser = { id: Date.now().toString(), name, email, password: pass, role: 'client' };
-            app.users.push(newUser);
-            localStorage.setItem('barbearia_users', JSON.stringify(app.users));
-            
-            app.currentUser = newUser;
-            localStorage.setItem('barbearia_user', JSON.stringify(newUser));
-            app.renderNav();
-            app.showPage('booking');
+            try {
+                const newUser = { name, email, password: pass, role: 'client' };
+                const { data, error } = await db.from('users').insert([newUser]).select();
+                
+                if (error) throw error;
+
+                app.currentUser = data[0];
+                app.storage.set('barbearia_user', app.currentUser);
+                await app.syncData(); // Atualiza lista local
+                
+                app.renderNav();
+                app.showToast('Conta criada com sucesso!');
+                app.showPage('booking');
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao cadastrar. Tente novamente.');
+            }
         };
 
         // Booking Form
@@ -202,7 +444,7 @@ const app = {
         const dateInput = document.getElementById('book-date').value;
         const date = new Date(dateInput + 'T00:00:00');
         const day = date.getDay(); // 0 is Sunday
-        
+
         const addressRow = document.getElementById('address-container');
         if (day === 0) {
             addressRow.style.display = 'block';
@@ -211,7 +453,7 @@ const app = {
             addressRow.style.display = 'none';
             document.getElementById('book-address').required = false;
         }
-        
+
         app.updatePricePreview();
     },
 
@@ -220,11 +462,12 @@ const app = {
         const dateInput = document.getElementById('book-date').value;
         const addBeard = document.getElementById('add-beard').checked;
         const addEyebrow = document.getElementById('add-eyebrow').checked;
+        const addPezinho = document.getElementById('add-pezinho').checked;
         const addPigment = document.getElementById('add-pigment').checked;
-        
+
         let total = 0;
         let isSunday = false;
-        
+
         if (dateInput) {
             const date = new Date(dateInput + 'T00:00:00');
             isSunday = (date.getDay() === 0);
@@ -239,8 +482,9 @@ const app = {
         else if (['Luzes', 'Platinado'].includes(service)) isSpecialty = true;
 
         total = basePrice;
-        if (addBeard) total += 5;
+        if (addBeard) total += 10;
         if (addEyebrow) total += 5;
+        if (addPezinho) total += 10;
         if (addPigment) total += 10;
 
         if (isSpecialty) {
@@ -256,9 +500,10 @@ const app = {
         const time = document.getElementById('book-time').value;
         const addBeard = document.getElementById('add-beard').checked;
         const addEyebrow = document.getElementById('add-eyebrow').checked;
+        const addPezinho = document.getElementById('add-pezinho').checked;
         const addPigment = document.getElementById('add-pigment').checked;
         const address = document.getElementById('book-address').value;
-        
+
         // Calculate final price and duration
         const dt = new Date(date + 'T00:00:00');
         const isSun = dt.getDay() === 0;
@@ -272,8 +517,9 @@ const app = {
             duration = 60;
         }
 
-        if (addBeard) { price += 5; duration += 15; }
+        if (addBeard) { price += 10; duration += 15; }
         if (addEyebrow) { price += 5; duration += 5; }
+        if (addPezinho) { price += 10; duration += 10; }
         if (addPigment) { price += 10; duration += 15; }
 
         // Rule: Minimum 1h advance booking
@@ -282,54 +528,78 @@ const app = {
         const oneHourLater = new Date(now.getTime() + (60 * 60 * 1000));
 
         if (selectedTime < oneHourLater) {
-            alert('Agendamentos devem ser feitos com no mínimo 1 hora de antecedência.');
+            app.showToast('Favor agendar com pelo menos 1h de antecedência.');
             return;
         }
 
         // Rule: Check Overlap
         if (app.isTimeOccupied(date, time, duration, app.editingAppointmentId)) {
-            alert('Este horário (ou o período do serviço) já está ocupado. Por favor, escolha outro.');
+            app.showToast('Este horário já está ocupado. Escolha outro.');
             return;
         }
 
         if (app.editingAppointmentId) {
-            const index = app.appointments.findIndex(a => a.id === app.editingAppointmentId);
-            if (index !== -1) {
-                app.appointments[index] = {
-                    ...app.appointments[index],
-                    service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPigment ? ' + Pigmentação' : ''}`,
-                    date,
-                    time,
-                    price,
-                    duration,
-                    isSunday: isSun,
-                    address: isSun ? address : 'No salão'
-                };
-                alert('Agendamento atualizado!');
-            }
-            app.resetEditing();
-        } else {
-            const appointment = {
-                id: Date.now().toString(),
-                clientId: app.currentUser.id,
-                clientName: app.currentUser.name,
-                service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPigment ? ' + Pigmentação' : ''}`,
+            // Edição
+            app.updateExistingAppointment({
+                id: app.editingAppointmentId,
+                service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPezinho ? ' + Pezinho' : ''}${addPigment ? ' + Pigmentação' : ''}`,
                 date,
                 time,
                 price,
                 duration,
-                isSunday: isSun,
+                issunday: isSun,
+                address: isSun ? address : 'No salão'
+            });
+        } else {
+            // Novo
+            app.saveNewAppointment({
+                clientid: app.currentUser.id,
+                clientname: app.currentUser.name,
+                service: `${service}${addBeard ? ' + Barba' : ''}${addEyebrow ? ' + Sobrancelha' : ''}${addPezinho ? ' + Pezinho' : ''}${addPigment ? ' + Pigmentação' : ''}`,
+                date,
+                time,
+                price,
+                duration,
+                issunday: isSun,
                 address: isSun ? address : 'No salão',
                 status: 'Pendente'
-            };
-            app.appointments.push(appointment);
-            alert('Desde já, agradecemos pela preferência, você receberá um aviso no seu E-mail 24 horas e 2 horas antes do seu horário marcado!');
+            });
         }
 
-        localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
-        app.renderClientAppointments();
         document.getElementById('appointment-form').reset();
         app.updatePricePreview();
+    },
+
+    saveNewAppointment: async (appointment) => {
+        try {
+            app.showToast('Agendando...');
+            const { error } = await db.from('appointments').insert([appointment]);
+            if (error) throw error;
+
+            await app.syncData();
+            app.renderClientAppointments();
+            app.showToast('Agendamento concluído com sucesso!');
+        } catch (err) {
+            console.error('Erro ao salvar:', err);
+            // Mostra o erro técnico para o usuário poder me informar
+            app.showToast(`Erro no banco: ${err.message || 'Falha ao salvar'}`);
+        }
+    },
+
+    updateExistingAppointment: async (data) => {
+        try {
+            app.showToast('Salvando...');
+            const { error } = await db.from('appointments').update(data).eq('id', data.id);
+            if (error) throw error;
+
+            await app.syncData();
+            app.resetEditing();
+            app.renderClientAppointments();
+            app.showToast('Agendamento atualizado!');
+        } catch (err) {
+            console.error('Erro ao atualizar:', err);
+            app.showToast(`Erro na atualização: ${err.message}`);
+        }
     },
 
     // --- TIME UTILS ---
@@ -352,16 +622,17 @@ const app = {
     },
 
     renderClientAppointments: () => {
+        if (!app.currentUser) return; // Segurança contra crash
         app.renderClientHistory(); // Keep history in sync
         const list = document.getElementById('client-appointments-list');
-        const myApps = app.appointments.filter(a => a.clientId === app.currentUser.id && a.status !== 'Concluído');
-        
+        const myApps = app.appointments.filter(a => a.clientid === app.currentUser.id && a.status !== 'Concluído');
+
         if (myApps.length === 0) {
             list.innerHTML = `<p class="empty-msg">Você ainda não possui agendamentos.</p>`;
             return;
         }
 
-        list.innerHTML = myApps.sort((a,b) => new Date(b.date) - new Date(a.date)).map(a => `
+        list.innerHTML = myApps.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => `
             <div class="appointment-card">
                 <div style="display:flex; justify-content:space-between">
                     <h4>${a.service}</h4>
@@ -369,7 +640,7 @@ const app = {
                 </div>
                 <p><i class="fas fa-calendar"></i> ${a.date.split('-').reverse().join('/')} às ${a.time}</p>
                 <p><i class="fas fa-money-bill"></i> ${a.price > 0 ? `R$ ${a.price.toFixed(2).replace('.', ',')}` : 'Preço a combinar'}</p>
-                ${a.isSunday ? `<p><i class="fas fa-home"></i> ${a.address}</p>` : ''}
+                ${a.issunday ? `<p><i class="fas fa-home"></i> ${a.address}</p>` : ''}
                 
                 <div style="margin-top: 10px; display: flex; gap: 10px; flex-wrap: wrap;">
                     ${a.status === 'Pendente' ? `
@@ -386,8 +657,8 @@ const app = {
 
     renderClientHistory: () => {
         const list = document.getElementById('client-history-list');
-        if (!list) return;
-        const history = app.appointments.filter(a => a.clientId === app.currentUser.id && a.status.toLowerCase() === 'concluído');
+        if (!list || !app.currentUser) return;
+        const history = app.appointments.filter(a => a.clientid === app.currentUser.id && a.status.toLowerCase() === 'concluído');
         const now = new Date();
 
         if (history.length === 0) {
@@ -395,10 +666,10 @@ const app = {
             return;
         }
 
-        list.innerHTML = history.sort((a,b) => new Date(b.date) - new Date(a.date)).map(a => {
+        list.innerHTML = history.sort((a, b) => new Date(b.date) - new Date(a.date)).map(a => {
             const appDate = new Date(a.date + 'T00:00:00');
             const diffDays = Math.floor((now - appDate) / (1000 * 60 * 60 * 24));
-            
+
             let suggestion = '';
             // Touch-up logic for Platinado (20 days)
             if (a.service.includes('Platinado') && diffDays >= 20) {
@@ -427,7 +698,7 @@ const app = {
         const email = app.currentUser.email;
         const subject = encodeURIComponent(`💡 Hora de cuidar do seu visual - Barbearia da Baixada`);
         const body = encodeURIComponent(`Olá ${app.currentUser.name}!\n\nPercebemos que já faz 20 dias que você realizou seu ${service} conosco (no dia ${date.split('-').reverse().join('/')}).\n\nQue tal agendar um retoque para manter o estilo impecável?\n\nAgende agora pelo nosso site ou responda este e-mail!\n\nAtenciosamente,\nBarbearia da Baixada 💈`);
-        
+
         const mailto = `https://mail.google.com/mail/?view=cm&fs=1&to=${email}&su=${subject}&body=${body}`;
         window.open(mailto, '_blank');
         alert('Abrindo o Gmail para você enviar o lembrete de retoque!');
@@ -438,9 +709,9 @@ const app = {
         if (!a) return;
         app.currentPaymentId = id;
         document.getElementById('pay-total').innerText = `R$ ${a.price.toFixed(2).replace('.', ',')}`;
-        
+
         // Use barber's custom PIX key if available
-        const savedPixKey = localStorage.getItem('barber_pix_key');
+        const savedPixKey = app.storage.get('barber_pix_key', null);
         if (savedPixKey) {
             document.getElementById('pix-key').value = savedPixKey;
         }
@@ -457,30 +728,39 @@ const app = {
         const pix = document.getElementById('pix-key');
         pix.select();
         document.execCommand('copy');
-        alert('Código PIX copiado!');
+        app.showToast('Código PIX copiado!');
     },
 
     confirmPayment: () => {
         const a = app.appointments.find(appo => appo.id === app.currentPaymentId);
         if (a) {
             a.status = 'Pago';
-            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+            app.storage.set('barbearia_appointments', app.appointments);
             app.closePayment();
             app.renderClientAppointments();
-            
+
             const wpMsg = encodeURIComponent(`Olá! Acabei de realizar o pagamento do agendamento de ${a.service} para o dia ${a.date.split('-').reverse().join('/')} às ${a.time}. Segue o comprovante.`);
             const wpLink = `https://wa.me/5573998376471?text=${wpMsg}`;
-            
+
             alert('Pagamento registrado! Agora, por favor, envie o comprovante pelo WhatsApp que abrirá a seguir.');
             window.open(wpLink, '_blank');
         }
     },
 
-    cancelAppointment: (id) => {
+    cancelAppointment: async (id) => {
         if (confirm('Deseja realmente cancelar este agendamento?')) {
-            app.appointments = app.appointments.filter(a => a.id !== id);
-            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
-            app.renderClientAppointments();
+            try {
+                app.showToast('Cancelando...');
+                const { error } = await db.from('appointments').delete().eq('id', id);
+                if (error) throw error;
+
+                await app.syncData();
+                app.renderClientAppointments();
+                app.showToast('Agendamento cancelado.');
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao cancelar agendamento.');
+            }
         }
     },
 
@@ -489,17 +769,18 @@ const app = {
         if (!a) return;
 
         app.editingAppointmentId = id;
-        
+
         // Fill form
         const serviceBase = a.service.split(' +')[0];
         document.getElementById('book-service').value = serviceBase;
         document.getElementById('add-beard').checked = a.service.includes('Barba');
         document.getElementById('add-eyebrow').checked = a.service.includes('Sobrancelha');
+        document.getElementById('add-pezinho').checked = a.service.includes('Pezinho');
         document.getElementById('add-pigment').checked = a.service.includes('Pigmentação');
         document.getElementById('book-date').value = a.date;
         document.getElementById('book-time').value = a.time;
-        
-        if (a.isSunday) {
+
+        if (a.issunday) {
             document.getElementById('address-container').style.display = 'block';
             document.getElementById('book-address').value = a.address;
         } else {
@@ -508,7 +789,7 @@ const app = {
 
         app.updatePricePreview();
         document.querySelector('#appointment-form button').innerText = 'Salvar Alterações';
-        
+
         // Add cancel edit button if not exists
         if (!document.getElementById('btn-cancel-edit')) {
             const cancelBtn = document.createElement('button');
@@ -520,7 +801,7 @@ const app = {
             cancelBtn.onclick = app.resetEditing;
             document.getElementById('appointment-form').appendChild(cancelBtn);
         }
-        
+
         window.scrollTo({ top: document.getElementById('booking').offsetTop - 100, behavior: 'smooth' });
     },
 
@@ -535,7 +816,7 @@ const app = {
 
     // --- NOTIFICATIONS ---
     loadNotificationSettings: () => {
-        const settings = JSON.parse(localStorage.getItem('barber_notif_settings')) || { n24h: true, n2h: true };
+        const settings = app.storage.get('barber_notif_settings', { n24h: true, n2h: true });
         const c24h = document.getElementById('notify-24h');
         const c2h = document.getElementById('notify-2h');
         if (c24h) c24h.checked = settings.n24h;
@@ -547,12 +828,12 @@ const app = {
             n24h: document.getElementById('notify-24h').checked,
             n2h: document.getElementById('notify-2h').checked
         };
-        localStorage.setItem('barber_notif_settings', JSON.stringify(settings));
+        app.storage.set('barber_notif_settings', settings);
     },
 
     checkAndSendReminders: () => {
         const now = new Date();
-        const settings = JSON.parse(localStorage.getItem('barber_notif_settings')) || { n24h: true, n2h: true };
+        const settings = app.storage.get('barber_notif_settings', { n24h: true, n2h: true });
         let sentCount = 0;
 
         app.appointments.forEach(a => {
@@ -578,17 +859,17 @@ const app = {
         });
 
         if (sentCount > 0) {
-            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+            app.storage.set('barbearia_appointments', app.appointments);
         }
     },
 
     simulateEmail: (appointment, window) => {
         const log = document.getElementById('notification-log');
         const time = new Date().toLocaleTimeString();
-        const msg = `[${time}] E-mail de lembrete (${window}) enviado para: ${appointment.clientName}`;
-        
+        const msg = `[${time}] E-mail de lembrete (${window}) enviado para: ${appointment.clientname}`;
+
         console.log(`SIMULAÇÃO DE EMAIL: ${msg}`);
-        
+
         if (log) {
             const entry = document.createElement('div');
             entry.innerText = msg;
@@ -600,12 +881,12 @@ const app = {
     setBarberTab: (tab) => {
         document.getElementById('tab-agenda').classList.toggle('active', tab === 'agenda');
         document.getElementById('tab-wallet').classList.toggle('active', tab === 'wallet');
-        
+
         document.getElementById('barber-agenda').style.display = tab === 'agenda' ? 'block' : 'none';
         document.getElementById('barber-wallet').style.display = tab === 'wallet' ? 'block' : 'none';
 
         if (tab === 'wallet') {
-            const savedPixKey = localStorage.getItem('barber_pix_key');
+            const savedPixKey = app.storage.get('barber_pix_key', null);
             if (savedPixKey) {
                 document.getElementById('barber-pix-key-input').value = savedPixKey;
             }
@@ -614,21 +895,21 @@ const app = {
 
     updateBarberPixKey: () => {
         const newKey = document.getElementById('barber-pix-key-input').value;
-        localStorage.setItem('barber_pix_key', newKey);
-        alert('Chave PIX atualizada com sucesso!');
+        app.storage.set('barber_pix_key', newKey);
+        app.showToast('Chave PIX atualizada com sucesso!');
     },
 
     renderBarberDashboard: () => {
         const today = new Date().toLocaleDateString('en-CA'); // YYYY-MM-DD
-        
+
         // Filter appointments for today
         const todayApps = app.appointments.filter(a => a.date === today);
-        
+
         // Calculate revenue (Case-insensitive check for 'Concluído' or 'Pago')
         const todayRevenue = todayApps
             .filter(a => a.status.toLowerCase() === 'concluído' || a.status.toLowerCase() === 'pago')
             .reduce((sum, a) => sum + (a.price || 0), 0);
-        
+
         // Update Overview Stats
         const dailyRevEl = document.getElementById('daily-revenue');
         const dailyCountEl = document.getElementById('daily-count');
@@ -649,11 +930,11 @@ const app = {
 
         // Agenda
         const tbody = document.getElementById('barber-agenda-body');
-        const sorted = [...app.appointments].sort((a,b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
-        
+        const sorted = [...app.appointments].sort((a, b) => new Date(a.date + 'T' + a.time) - new Date(b.date + 'T' + b.time));
+
         tbody.innerHTML = sorted.map(a => `
             <tr>
-                <td><strong>${a.clientName}</strong></td>
+                <td><strong>${a.clientname}</strong></td>
                 <td>${a.service}</td>
                 <td>${a.date.split('-').reverse().join('/')}<br><small>${a.time}</small></td>
                 <td>${a.price > 0 ? `R$ ${a.price.toFixed(2).replace('.', ',')}` : 'A combinar'}</td>
@@ -664,13 +945,13 @@ const app = {
                     ${(a.status === 'Concluído') ? '<i class="fas fa-check-double" style="color:var(--primary)"></i>' : ''}
                 </td>
             </tr>
-            ${a.isSunday ? `<tr><td colspan="6" style="background: rgba(212, 175, 55, 0.05); font-size: 0.8rem; border-top: none;"><i class="fas fa-truck"></i> Endereço: ${a.address}</td></tr>` : ''}
+            ${a.issunday ? `<tr><td colspan="6" style="background: rgba(212, 175, 55, 0.05); font-size: 0.8rem; border-top: none;"><i class="fas fa-truck"></i> Endereço: ${a.address}</td></tr>` : ''}
         `).join('');
 
         // Finance
         const financeList = document.getElementById('finance-list');
         const completed = app.appointments.filter(a => a.status === 'Concluído');
-        
+
         if (completed.length === 0) {
             financeList.innerHTML = `<p class="empty-msg">Nenhum recebimento registrado.</p>`;
         } else {
@@ -680,7 +961,7 @@ const app = {
                 return acc;
             }, {});
 
-            financeList.innerHTML = Object.entries(byDay).sort((a,b) => new Date(b[0]) - new Date(a[0])).map(([date, total]) => `
+            financeList.innerHTML = Object.entries(byDay).sort((a, b) => new Date(b[0]) - new Date(a[0])).map(([date, total]) => `
                 <div class="finance-item">
                     <span>${date.split('-').reverse().join('/')}</span>
                     <strong style="color:var(--primary)">R$ ${total.toFixed(2).replace('.', ',')}</strong>
@@ -695,44 +976,66 @@ const app = {
         const duration = parseInt(document.getElementById('block-duration').value);
         const reason = document.getElementById('block-reason').value || 'Bloqueio Manual';
 
-        if (!date || !time) return alert('Selecione data e hora.');
-
         if (app.isTimeOccupied(date, time, duration)) {
-            return alert('Este horário já está ocupado por um cliente ou outro bloqueio.');
+            return app.showToast('Este horário já está ocupado.');
         }
 
-        const block = {
-            id: Date.now().toString(),
-            clientId: 'barber',
-            clientName: 'BLOQUEIO',
+        app.saveBlock({
+            clientid: 'barber',
+            clientname: 'BLOQUEIO',
             service: reason,
             date,
             time,
             price: 0,
             duration,
             status: 'Bloqueado'
-        };
-
-        app.appointments.push(block);
-        localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
-        app.renderBarberDashboard();
-        alert('Horário bloqueado com sucesso!');
+        });
     },
 
-    unblockTime: (id) => {
-        if (confirm('Deseja realmente desbloquear este horário?')) {
-            app.appointments = app.appointments.filter(a => a.id !== id);
-            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+    saveBlock: async (block) => {
+        try {
+            app.showToast('Bloqueando...');
+            const { error } = await db.from('appointments').insert([block]);
+            if (error) throw error;
+
+            await app.syncData();
             app.renderBarberDashboard();
+            app.showToast('Horário bloqueado!');
+        } catch (err) {
+            console.error(err);
+            app.showToast('Erro ao bloquear horário.');
         }
     },
 
-    completeAppointment: (id) => {
-        const appointment = app.appointments.find(a => a.id === id);
-        if (appointment) {
-            appointment.status = 'Concluído';
-            localStorage.setItem('barbearia_appointments', JSON.stringify(app.appointments));
+    unblockTime: async (id) => {
+        if (confirm('Deseja realmente desbloquear este horário?')) {
+            try {
+                app.showToast('Desbloqueando...');
+                const { error } = await db.from('appointments').delete().eq('id', id);
+                if (error) throw error;
+
+                await app.syncData();
+                app.renderBarberDashboard();
+                app.showToast('Horário desbloqueado.');
+            } catch (err) {
+                console.error(err);
+                app.showToast('Erro ao desbloquear.');
+            }
+        }
+    },
+
+    completeAppointment: async (id) => {
+        try {
+            app.showToast('Concluindo...');
+            const { error } = await db.from('appointments').update({ status: 'Concluído' }).eq('id', id);
+            if (error) throw error;
+
+            await app.syncData();
             app.renderBarberDashboard();
+            app.showToast('Serviço concluído!');
+        } catch (err) {
+            console.error(err);
+            app.showToast('Erro ao concluir serviço.');
         }
     }
 };

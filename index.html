@@ -9,13 +9,17 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
     <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="style.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 </head>
 <body>
     <div id="loader" class="loader-container">
         <div class="loader"></div>
     </div>
+
+    <div id="toast-container"></div>
 
     <nav class="navbar">
         <div class="container nav-content">
@@ -54,43 +58,63 @@
                             <h3>Corte Social</h3>
                             <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">O clássico que nunca sai de moda. Perfeito para qualquer ocasião.</p>
                         </div>
                         <div class="service-card">
                             <h3>Degradê</h3>
                             <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">Técnica moderna com transição suave. O favorito de quem busca estilo.</p>
                         </div>
                         <div class="service-card">
                             <h3>Barba</h3>
-                            <p class="price">R$ 5,00</p>
-                            <p class="info">Dê um trato no visual completo.</p>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.</p>
                         </div>
                         <div class="service-card">
                             <h3>Sobrancelha</h3>
                             <p class="price">R$ 5,00</p>
-                            <p class="info">O cuidado que faz a diferença.</p>
+                            <p class="service-desc">O detalhe que abre o olhar e harmoniza o seu rosto.</p>
+                        </div>
+                        <div class="service-card">
+                            <h3>Pezinho</h3>
+                            <p class="price">R$ 10,00</p>
+                            <p class="service-desc">Acabamento impecável nos contornos do cabelo.</p>
                         </div>
                         <div class="service-card specialty">
-                            <h3>Luzes</h3>
+                            <h3>Luzes / Platinado</h3>
                             <p class="price-negotiate">Preço a combinar</p>
-                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para fazer Luzes." target="_blank" class="btn-whatsapp-small">
-                                <i class="fab fa-whatsapp"></i> Consultar
-                            </a>
-                        </div>
-                        <div class="service-card specialty">
-                            <h3>Platinado</h3>
-                            <p class="price-negotiate">Preço a combinar</p>
-                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber o preço para o Platinado." target="_blank" class="btn-whatsapp-small">
-                                <i class="fab fa-whatsapp"></i> Consultar
+                            <p class="service-desc">Transformação total para um visual de impacto e personalidade.</p>
+                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber mais sobre os serviços de descoloração." target="_blank" class="btn-whatsapp-small">
+                                <i class="fab fa-whatsapp"></i> Consultar Disponibilidade
                             </a>
                         </div>
                         <div class="service-card">
                             <h3>Pigmentação</h3>
-                            <p class="price">R$ 10,00</p>
-                            <p class="info">Realce o design do seu corte.</p>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Realce a linha do seu cabelo e barba com o acabamento perfeito.</p>
                         </div>
                     </div>
                     <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado neste dia possui um acréscimo de R$ 5,00.</p>
+                </div>
+            </section>
+            <section class="features-section glass" style="margin: 100px auto; max-width: 1000px; padding: 60px;">
+                <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
+                    <div class="feature-item">
+                        <i class="fas fa-crown" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Atendimento Premium</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Foco total na sua experiência e satisfação.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-calendar-check" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Sem Filas</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Respeito total ao seu tempo com horários marcados.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-home" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Home Care</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Atendimento no conforto da sua casa aos domingos.</p>
+                    </div>
                 </div>
             </section>
         </section>
@@ -114,6 +138,9 @@
                             <label>Senha</label>
                             <input type="password" id="login-password" required placeholder="••••••••">
                         </div>
+                        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+                            <a href="#" onclick="app.forgotPassword()" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Esqueci minha senha</a>
+                        </div>
                         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
                     </form>
 
@@ -132,6 +159,34 @@
                             <input type="password" id="reg-password" required placeholder="Mínimo 6 caracteres">
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+                    </form>
+
+                    <!-- Forgot Password Section -->
+                    <form id="recovery-form" style="display: none;">
+                        <h3>Recuperar Senha</h3>
+                        <div id="recovery-step-1">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+                                Informe seu e-mail cadastrado. Abriremos o Gmail para você gerar seu código.
+                            </p>
+                            <div class="input-group">
+                                <label>Seu e-mail</label>
+                                <input type="email" id="recovery-email" required placeholder="seu@email.com">
+                            </div>
+                            <button type="button" class="btn btn-primary btn-block" onclick="app.sendRecoveryCode()">Enviar Código para Gmail</button>
+                        </div>
+
+                        <div id="recovery-step-2" style="display: none;">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+                                Digite abaixo o código de 6 dígitos que foi gerado no seu Gmail.
+                            </p>
+                            <div class="input-group">
+                                <label>Código de confirmação</label>
+                                <input type="text" id="recovery-code-input" required placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
+                            </div>
+                            <button type="button" class="btn btn-primary btn-block" onclick="app.verifyRecoveryCode()">Verificar Código</button>
+                        </div>
+                        
+                        <a href="#" onclick="app.setAuthTab('login')" style="display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Voltar ao Login</a>
                     </form>
 
                     <p style="margin-top: 25px; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 15px;">
@@ -156,8 +211,9 @@
                                 </select>
                             </div>
                             <div class="checkbox-group">
-                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 5)</label>
+                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 10)</label>
                                 <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> + Sobrancelha (R$ 5)</label>
+                                <label><input type="checkbox" id="add-pezinho" onchange="app.updatePricePreview()"> + Pezinho (R$ 10)</label>
                                 <label><input type="checkbox" id="add-pigment" onchange="app.updatePricePreview()"> + Pigmentação (R$ 10)</label>
                             </div>
                             <div class="input-group">
@@ -224,6 +280,13 @@
                         <div class="stat-card glass">
                             <small>Cortes para Hoje</small>
                             <h3 id="daily-count">0</h3>
+                        </div>
+                        <div class="stat-card glass" id="license-card">
+                            <small>Licença e Suporte</small>
+                            <div id="license-info" style="margin-top: 5px;">
+                                <span class="status-badge status-pago" style="font-size: 0.7rem;">ATIVA</span>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Vencimento: <span id="payment-due-date">--/--/----</span></p>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -345,9 +408,8 @@
                     <p>Valor total: <strong id="pay-total">R$ 0,00</strong></p>
                     <div class="pix-area">
                         <p>Pagamento via <strong>PIX</strong></p>
-                        <div class="qr-placeholder">
-                            <i class="fas fa-qrcode"></i>
-                            <p>QR Code Simulado</p>
+                        <div class="qr-container" style="background: white; padding: 15px; border-radius: 12px; margin: 20px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <img src="pix_qr_code.jpg" alt="PIX QR Code" style="width: 200px; height: 200px; display: block;">
                         </div>
                         <div class="copy-paste">
                             <input type="text" id="pix-key" value="00020126330014BR.GOV.BCB.PIX..." readonly>
