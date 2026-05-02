@@ -23,15 +23,15 @@
 
     <nav class="navbar">
         <div class="container nav-content">
+            <button class="menu-toggle" id="menu-toggle" onclick="app.toggleMenu()">
+                <i class="fas fa-bars"></i>
+            </button>
             <a href="#" class="logo" onclick="app.showPage('home')">
                 <i class="fas fa-cut"></i> Barbearia da <span>Baixada</span>
             </a>
             <ul class="nav-links" id="nav-links">
                 <!-- Dynamic links -->
             </ul>
-            <button class="menu-toggle" id="menu-toggle" onclick="app.toggleMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
         </div>
     </nav>
 
@@ -44,60 +44,11 @@
                     <h1>Sua melhor versão começa aqui.</h1>
                     <p>Atendimento exclusivo com horário marcado. Qualidade e estilo no coração da baixada.</p>
                     <div class="hero-btns">
-                        <button class="btn btn-primary" onclick="app.checkAuth('booking')">Agendar Horário</button>
-                        <button class="btn btn-outline" onclick="app.scrollTo('services')">Ver Preços</button>
+                        <button class="btn btn-primary" onclick="app.showPage('services-page')">Menu de Cortes</button>
                     </div>
                 </div>
             </header>
 
-            <section id="services" class="services-section">
-                <div class="container">
-                    <h2 class="section-title">Nossos Serviços</h2>
-                    <div class="services-grid">
-                        <div class="service-card">
-                            <h3>Corte Social</h3>
-                            <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
-                            <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
-                            <p class="service-desc">O clássico que nunca sai de moda. Perfeito para qualquer ocasião.</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Degradê</h3>
-                            <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
-                            <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
-                            <p class="service-desc">Técnica moderna com transição suave. O favorito de quem busca estilo.</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Barba</h3>
-                            <p class="price">A partir de R$ 10,00</p>
-                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Sobrancelha</h3>
-                            <p class="price">R$ 5,00</p>
-                            <p class="service-desc">O detalhe que abre o olhar e harmoniza o seu rosto.</p>
-                        </div>
-                        <div class="service-card">
-                            <h3>Pezinho</h3>
-                            <p class="price">R$ 10,00</p>
-                            <p class="service-desc">Acabamento impecável nos contornos do cabelo.</p>
-                        </div>
-                        <div class="service-card specialty">
-                            <h3>Luzes / Platinado</h3>
-                            <p class="price-negotiate">Preço a combinar</p>
-                            <p class="service-desc">Transformação total para um visual de impacto e personalidade.</p>
-                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber mais sobre os serviços de descoloração." target="_blank" class="btn-whatsapp-small">
-                                <i class="fab fa-whatsapp"></i> Consultar Disponibilidade
-                            </a>
-                        </div>
-                        <div class="service-card">
-                            <h3>Pigmentação</h3>
-                            <p class="price">A partir de R$ 10,00</p>
-                            <p class="service-desc">Realce a linha do seu cabelo e barba com o acabamento perfeito.</p>
-                        </div>
-                    </div>
-                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado neste dia possui um acréscimo de R$ 5,00.</p>
-                </div>
-            </section>
             <section class="features-section glass" style="margin: 100px auto; max-width: 1000px; padding: 60px;">
                 <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
                     <div class="feature-item">
@@ -112,9 +63,67 @@
                     </div>
                     <div class="feature-item">
                         <i class="fas fa-home" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
-                        <h4>Home Care</h4>
+                        <h4>Atendimento a Domicílio</h4>
                         <p style="font-size: 0.9rem; color: var(--text-muted);">Atendimento no conforto da sua casa aos domingos.</p>
                     </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Services Page -->
+        <section id="services-page" class="page">
+            <section id="services" class="services-section" style="padding-top: 0;">
+                <div class="container">
+                    <h2 class="section-title">Nossos Serviços</h2>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <h3>Corte Social</h3>
+                            <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
+                            <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">O clássico que nunca sai de moda. Perfeito para qualquer ocasião.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Corte Social')">Agendar Este Corte</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Degradê</h3>
+                            <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
+                            <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">Técnica moderna com transição suave. O favorito de quem busca estilo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Degradê')">Agendar Este Corte</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Barba</h3>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Barba')">Agendar Barba</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Sobrancelha</h3>
+                            <p class="price">R$ 5,00</p>
+                            <p class="service-desc">O detalhe que abre o olhar e harmoniza o seu rosto.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Sobrancelha')">Agendar Sobrancelha</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Pezinho</h3>
+                            <p class="price">R$ 10,00</p>
+                            <p class="service-desc">Acabamento impecável nos contornos do cabelo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Pezinho')">Agendar Pezinho</button>
+                        </div>
+                        <div class="service-card specialty">
+                            <h3>Luzes / Platinado</h3>
+                            <p class="price-negotiate">Preço a combinar</p>
+                            <p class="service-desc">Transformação total para visual de impacto.</p>
+                            <a href="https://wa.me/5573998376471?text=Olá! Gostaria de saber mais sobre os serviços de descoloração." target="_blank" class="btn-whatsapp-small">
+                                <i class="fab fa-whatsapp"></i> Consultar Disponibilidade
+                            </a>
+                        </div>
+                        <div class="service-card">
+                            <h3>Pigmentação</h3>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Realce a linha do seu cabelo e barba.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Pigmentação')">Agendar Pigmentação</button>
+                        </div>
+                    </div>
+                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado neste dia possui um acréscimo de R$ 5,00.</p>
                 </div>
             </section>
         </section>
@@ -208,6 +217,11 @@
                                 <select id="book-service" required onchange="app.updatePricePreview()">
                                     <option value="Corte Social">Corte Social</option>
                                     <option value="Degradê">Degradê</option>
+                                    <option value="Apenas Barba">Apenas Barba</option>
+                                    <option value="Apenas Pezinho">Apenas Pezinho</option>
+                                    <option value="Apenas Sobrancelha">Apenas Sobrancelha</option>
+                                    <option value="Apenas Pigmentação">Apenas Pigmentação</option>
+                                    <option value="Luzes / Platinado">Luzes / Platinado</option>
                                 </select>
                             </div>
                             <div class="checkbox-group">
@@ -257,7 +271,7 @@
                             <p class="empty-msg">Você ainda não possui agendamentos.</p>
                         </div>
 
-                        <h2 style="margin-top: 40px;">Meu Histórico de Estilo</h2>
+                        <h2 style="margin-top: 40px;">Meu Histórico de Cortes</h2>
                         <div id="client-history-list">
                             <!-- Dynamic history -->
                         </div>
@@ -444,8 +458,10 @@
     <footer class="footer">
         <div class="container">
             <p>&copy; 2026 Barbearia da Baixada. Todos os direitos reservados.</p>
-            <div class="footer-contact">
-                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Agende pelo WhatsApp</a>
+            <div class="footer-contact" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="https://instagram.com/viniiobarber.ofc" target="_blank"><i class="fab fa-instagram"></i> @viniiobarber.ofc</a>
+                <a href="https://instagram.com/viniciius_s0uza" target="_blank"><i class="fab fa-instagram"></i> @viniciius_s0uza</a>
+                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Fale Conosco pelo WhatsApp</a>
             </div>
         </div>
     </footer>

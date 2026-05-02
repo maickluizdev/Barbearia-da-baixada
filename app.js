@@ -89,6 +89,14 @@ const app = {
         }, 1000);
 
         app.showPage('home');
+
+        // Abrir o menu lateral automaticamente após o carregamento
+        setTimeout(() => {
+            const nav = document.getElementById('nav-links');
+            if (nav && !nav.classList.contains('active')) {
+                app.toggleMenu();
+            }
+        }, 1200);
     },
 
     // Função para buscar tudo do banco de dados
@@ -226,23 +234,38 @@ const app = {
 
         // Close mobile menu on page change
         const nav = document.getElementById('nav-links');
-        if (nav) nav.classList.remove('active');
+        const toggleBtn = document.getElementById('menu-toggle');
+        if (nav) {
+            nav.classList.remove('active');
+            if (toggleBtn) {
+                toggleBtn.style.opacity = '1';
+                toggleBtn.style.pointerEvents = 'auto';
+            }
+        }
     },
 
     toggleMenu: () => {
         const nav = document.getElementById('nav-links');
+        const toggleBtn = document.getElementById('menu-toggle');
         nav.classList.toggle('active');
-        const icon = document.querySelector('.menu-toggle i');
-        if (nav.classList.contains('active')) {
-            icon.classList.replace('fa-bars', 'fa-times');
-        } else {
-            icon.classList.replace('fa-times', 'fa-bars');
+        
+        if (toggleBtn) {
+            if (nav.classList.contains('active')) {
+                toggleBtn.style.opacity = '0';
+                toggleBtn.style.pointerEvents = 'none';
+            } else {
+                toggleBtn.style.opacity = '1';
+                toggleBtn.style.pointerEvents = 'auto';
+            }
         }
     },
 
     renderNav: () => {
         const nav = document.getElementById('nav-links');
-        let html = `<li><a href="#" onclick="app.showPage('home')">Início</a></li>`;
+        let html = `
+            <button class="close-menu-btn" onclick="app.toggleMenu()"><i class="fas fa-times"></i></button>
+            <li><a href="#" onclick="app.showPage('home')">Início</a></li>
+            <li><a href="#" onclick="app.showPage('services-page')">Menu de Cortes</a></li>`;
 
         if (app.currentUser) {
             if (app.currentUser.role === 'barber') {
@@ -354,6 +377,21 @@ const app = {
         } else {
             app.showToast('Código incorreto. Verifique o Gmail.');
         }
+    },
+
+    preSelectService: (serviceName) => {
+        const serviceSelect = document.getElementById('book-service');
+        if (serviceSelect) {
+            serviceSelect.value = serviceName;
+            // Reset additional checkboxes just in case
+            document.getElementById('add-beard').checked = false;
+            document.getElementById('add-eyebrow').checked = false;
+            document.getElementById('add-pezinho').checked = false;
+            document.getElementById('add-pigment').checked = false;
+            
+            app.updatePricePreview();
+        }
+        app.checkAuth('booking');
     },
 
     checkAuth: (pageToRedirect) => {
@@ -479,7 +517,11 @@ const app = {
 
         if (service === 'Corte Social') basePrice = isSunday ? 25 : 20;
         else if (service === 'Degradê') basePrice = isSunday ? 30 : 25;
-        else if (['Luzes', 'Platinado'].includes(service)) isSpecialty = true;
+        else if (service === 'Apenas Barba') basePrice = 10;
+        else if (service === 'Apenas Pezinho') basePrice = 10;
+        else if (service === 'Apenas Sobrancelha') basePrice = 5;
+        else if (service === 'Apenas Pigmentação') basePrice = 10;
+        else if (['Luzes', 'Platinado', 'Luzes / Platinado'].includes(service)) isSpecialty = true;
 
         total = basePrice;
         if (addBeard) total += 10;
@@ -510,8 +552,12 @@ const app = {
         let price = 0;
         let duration = 45; // Base duration in minutes
 
-        if (service === 'Corte Social') price = isSun ? 25 : 20;
-        else if (service === 'Degradê') price = isSun ? 30 : 25;
+        if (service === 'Corte Social') { price = isSun ? 25 : 20; duration = 45; }
+        else if (service === 'Degradê') { price = isSun ? 30 : 25; duration = 45; }
+        else if (service === 'Apenas Barba') { price = 10; duration = 15; }
+        else if (service === 'Apenas Pezinho') { price = 10; duration = 10; }
+        else if (service === 'Apenas Sobrancelha') { price = 5; duration = 10; }
+        else if (service === 'Apenas Pigmentação') { price = 10; duration = 15; }
         else { // Specialty
             price = 0;
             duration = 60;
