@@ -540,6 +540,19 @@ const app = {
         const service = document.getElementById('book-service').value;
         const date = document.getElementById('book-date').value;
         const time = document.getElementById('book-time').value;
+        
+        if (service === 'Luzes / Platinado' || service === 'Luzes' || service === 'Platinado') {
+            if (!date) {
+                app.showToast('Por favor, escolha uma data primeiro.');
+                return;
+            }
+            const [y, m, d] = date.split('-');
+            const msg = `E aí, Vini. Quero fazer um platinado/luzes. Data: ${d}/${m}/${y}`;
+            const url = `https://wa.me/5573998376471?text=${encodeURIComponent(msg)}`;
+            window.open(url, '_blank');
+            return;
+        }
+
         const addBeard = document.getElementById('add-beard').checked;
         const addEyebrow = document.getElementById('add-eyebrow').checked;
         const addPezinho = document.getElementById('add-pezinho').checked;
