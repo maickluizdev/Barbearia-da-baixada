@@ -682,11 +682,6 @@ td {
         height: 70px;
     }
 
-    .nav-links {
-        display: none;
-        /* Consider adding a mobile menu icon later */
-    }
-
     .hero h1 {
         margin-bottom: 20px;
     }
