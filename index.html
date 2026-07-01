@@ -21,18 +21,19 @@
 
     <div id="toast-container"></div>
 
-    <nav class="navbar">
-        <div class="container nav-content">
-            <button class="menu-toggle" id="menu-toggle" onclick="app.toggleMenu()">
-                <i class="fas fa-bars"></i>
-            </button>
+    <header class="top-header">
+        <div class="container header-content">
             <a href="#" class="logo" onclick="app.showPage('home')">
                 <i class="fas fa-cut"></i> Barbearia da <span>Baixada</span>
             </a>
-            <ul class="nav-links" id="nav-links">
-                <!-- Dynamic links -->
-            </ul>
         </div>
+    </header>
+
+    <!-- Dock de Navegação Flutuante -->
+    <nav class="dock-container" id="dock-container">
+        <ul class="dock-items" id="dock-items">
+            <!-- Os itens do menu serão renderizados dinamicamente via JS -->
+        </ul>
     </nav>
 
     <main id="app-container">

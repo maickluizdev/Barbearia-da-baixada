@@ -89,14 +89,6 @@ const app = {
         }, 1000);
 
         app.showPage('home');
-
-        // Abrir o menu lateral automaticamente após o carregamento
-        setTimeout(() => {
-            const nav = document.getElementById('nav-links');
-            if (nav && !nav.classList.contains('active')) {
-                app.toggleMenu();
-            }
-        }, 1200);
     },
 
     // Função para buscar tudo do banco de dados
@@ -232,55 +224,65 @@ const app = {
         }
         if (pageId === 'barber-dashboard') app.renderBarberDashboard();
 
-        // Close mobile menu on page change
-        const nav = document.getElementById('nav-links');
-        const toggleBtn = document.getElementById('menu-toggle');
-        if (nav) {
-            nav.classList.remove('active');
-            if (toggleBtn) {
-                toggleBtn.style.opacity = '1';
-                toggleBtn.style.pointerEvents = 'auto';
-            }
-        }
+        // Atualiza a navegação ativa no dock
+        app.updateActiveDockItem();
     },
 
-    toggleMenu: () => {
-        const nav = document.getElementById('nav-links');
-        const toggleBtn = document.getElementById('menu-toggle');
-        nav.classList.toggle('active');
-        
-        if (toggleBtn) {
-            if (nav.classList.contains('active')) {
-                toggleBtn.style.opacity = '0';
-                toggleBtn.style.pointerEvents = 'none';
-            } else {
-                toggleBtn.style.opacity = '1';
-                toggleBtn.style.pointerEvents = 'auto';
+    updateActiveDockItem: () => {
+        document.querySelectorAll('.dock-item').forEach(item => item.classList.remove('active'));
+        const activePage = document.querySelector('.page.active');
+        if (activePage) {
+            const activeDockItem = document.getElementById(`dock-${activePage.id}`);
+            if (activeDockItem) {
+                activeDockItem.classList.add('active');
             }
         }
     },
 
     renderNav: () => {
-        const nav = document.getElementById('nav-links');
+        const dock = document.getElementById('dock-items');
+        if (!dock) return;
+
         let html = `
-            <button class="close-menu-btn" onclick="app.toggleMenu()"><i class="fas fa-times"></i></button>
-            <li><a href="#" onclick="app.showPage('home')">Início</a></li>
-            <li><a href="#" onclick="app.showPage('services-page')">Menu de Cortes</a></li>`;
+            <li class="dock-item" id="dock-home" onclick="app.showPage('home')">
+                <i class="fas fa-home"></i>
+                <span class="dock-tooltip">Início</span>
+            </li>
+            <li class="dock-item" id="dock-services-page" onclick="app.showPage('services-page')">
+                <i class="fas fa-cut"></i>
+                <span class="dock-tooltip">Menu de Cortes</span>
+            </li>`;
 
         if (app.currentUser) {
             if (app.currentUser.role === 'barber') {
-                html += `<li><a href="#" onclick="app.showPage('barber-dashboard')">Painel</a></li>`;
+                html += `
+                    <li class="dock-item" id="dock-barber-dashboard" onclick="app.showPage('barber-dashboard')">
+                        <i class="fas fa-chart-line"></i>
+                        <span class="dock-tooltip">Painel</span>
+                    </li>`;
             } else {
-                html += `<li><a href="#" onclick="app.showPage('booking')">Meus Agendamentos</a></li>`;
+                html += `
+                    <li class="dock-item" id="dock-booking" onclick="app.showPage('booking')">
+                        <i class="fas fa-calendar-check"></i>
+                        <span class="dock-tooltip">Meus Agendamentos</span>
+                    </li>`;
             }
-            html += `<li><a href="#" onclick="app.logout()">Sair (${app.currentUser.name.split(' ')[0]})</a></li>`;
+            html += `
+                <li class="dock-item logout-item" onclick="app.logout()">
+                    <i class="fas fa-sign-out-alt"></i>
+                    <span class="dock-tooltip">Sair (${app.currentUser.name.split(' ')[0]})</span>
+                </li>`;
         } else {
-            html += `<li><a href="#" class="btn btn-primary" onclick="app.showPage('auth')">Entrar</a></li>`;
+            html += `
+                <li class="dock-item" id="dock-auth" onclick="app.showPage('auth')">
+                    <i class="fas fa-user"></i>
+                    <span class="dock-tooltip">Entrar</span>
+                </li>`;
         }
 
-        nav.innerHTML = html;
+        dock.innerHTML = html;
 
-        // Hide booking buttons if barber is logged in
+        // Oculta botões de agendamento se for o barbeiro
         const bookingBtns = document.querySelectorAll('button[onclick*="booking"]');
         bookingBtns.forEach(btn => {
             if (app.currentUser && app.currentUser.role === 'barber') {
@@ -289,6 +291,9 @@ const app = {
                 btn.style.display = 'block';
             }
         });
+
+        // Garante que o estado correto esteja marcado
+        app.updateActiveDockItem();
     },
 
     scrollTo: (id) => {
@@ -406,8 +411,6 @@ const app = {
         app.currentUser = null;
         app.storage.set('barbearia_user', null);
         app.renderNav();
-        const nav = document.getElementById('nav-links');
-        if (nav) nav.classList.remove('active');
         app.showPage('home');
     },
 
@@ -542,12 +545,12 @@ const app = {
         const time = document.getElementById('book-time').value;
         
         if (service === 'Luzes / Platinado' || service === 'Luzes' || service === 'Platinado') {
-            if (!date) {
-                app.showToast('Por favor, escolha uma data primeiro.');
+            if (!date || !time) {
+                app.showToast('Por favor, escolha uma data e horário primeiro.');
                 return;
             }
             const [y, m, d] = date.split('-');
-            const msg = `E aí, Vini. Quero fazer um platinado/luzes. Data: ${d}/${m}/${y}`;
+            const msg = `E aí, Vini. Quero fazer um platinado/luzes. Data: ${d}/${m}/${y} às ${time}`;
             const url = `https://wa.me/5573998376471?text=${encodeURIComponent(msg)}`;
             window.open(url, '_blank');
             return;

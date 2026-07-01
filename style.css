@@ -64,33 +64,35 @@ body {
 }
 
 /* Navbar */
-.navbar {
-    height: 80px;
+/* Top Header Minimalista */
+.top-header {
+    height: 60px;
     display: flex;
     align-items: center;
     position: fixed;
     top: 0;
     width: 100%;
-    z-index: 1000;
-    background: rgba(10, 10, 10, 0.8);
-    backdrop-filter: blur(10px);
+    z-index: 999;
+    background: rgba(10, 10, 10, 0.4);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
 }
 
-.nav-content {
+.header-content {
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
-    width: 100%;
 }
 
 .logo {
     font-family: 'Playfair Display', serif;
-    font-size: 1.5rem;
+    font-size: 1.3rem;
     color: var(--text-light);
     text-decoration: none;
     font-weight: 700;
+    letter-spacing: 0.5px;
+    transition: var(--transition);
 }
 
 .logo span {
@@ -98,91 +100,239 @@ body {
 }
 
 .logo i {
-    margin-right: 10px;
+    margin-right: 8px;
     color: var(--primary);
 }
 
-.nav-links {
-    display: flex;
-    flex-direction: column;
-    list-style: none;
+/* Dock de Navegação Flutuante */
+.dock-container {
     position: fixed;
-    top: 0;
-    left: -350px;
-    width: 350px;
-    max-width: 100%;
-    height: 100vh;
-    background: rgba(10, 10, 10, 0.98);
-    backdrop-filter: blur(15px);
-    border-right: 1px solid var(--glass-border);
-    justify-content: flex-start;
-    padding-top: 100px;
-    align-items: center;
-    gap: 30px;
-    z-index: 1050;
-    transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.nav-links.active {
-    left: 0;
-}
-
-.close-menu-btn {
-    position: absolute;
-    top: 25px;
-    right: 25px;
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 2rem;
-    cursor: pointer;
+    z-index: 1000;
+    background: rgba(15, 15, 15, 0.65);
+    backdrop-filter: blur(25px);
+    -webkit-backdrop-filter: blur(25px);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6), var(--shadow-gold);
     transition: var(--transition);
 }
 
-.close-menu-btn:hover {
+.dock-items {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.dock-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text-muted);
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.dock-item i {
+    font-size: 1.25rem;
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), color 0.3s ease;
+}
+
+/* Hover e Estados Ativos */
+.dock-item:hover {
+    color: var(--primary);
+    background: rgba(255, 255, 255, 0.04);
+}
+
+.dock-item:hover i {
+    transform: scale(1.2) translateY(-2px);
+}
+
+.dock-item.active {
     color: var(--primary);
 }
 
-.nav-links a {
-    color: var(--text-light);
-    text-decoration: none;
-    font-size: 1.3rem;
-    font-weight: 600;
-    transition: var(--transition);
-    position: relative;
-}
-
-.nav-links a::after {
+/* Indicador Ativo (Ponto de Luz Dourado) */
+.dock-item::after {
     content: '';
     position: absolute;
-    bottom: -5px;
-    left: 0;
-    width: 0;
-    height: 2px;
     background: var(--primary);
-    transition: var(--transition);
+    border-radius: 50%;
+    opacity: 0;
+    transform: scale(0);
+    transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    box-shadow: 0 0 12px var(--primary), 0 0 4px var(--primary);
 }
 
-.nav-links a:hover {
-    color: var(--primary);
+.dock-item.active::after {
+    opacity: 1;
+    transform: scale(1);
 }
 
-.nav-links a:hover::after {
-    width: 100%;
-}
-
-.menu-toggle {
-    display: block; /* Sempre visível agora */
-    background: none;
-    border: none;
-    color: var(--text-light);
-    font-size: 1.5rem;
-    cursor: pointer;
-    z-index: 1100;
+/* Tooltips do Dock */
+.dock-tooltip {
     position: absolute;
-    left: 0;
-    transition: 0.3s;
+    background: rgba(10, 10, 10, 0.95);
+    color: var(--text-light);
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 6px 12px;
+    border-radius: 8px;
+    border: 1px solid var(--glass-border);
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+    transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
+
+/* Divisor de Logout */
+.dock-item.logout-item {
+    color: var(--text-muted);
+}
+
+.dock-item.logout-item:hover {
+    color: #ff4d4d;
+    background: rgba(220, 53, 69, 0.1);
+}
+
+/* --- CONFIGURAÇÃO RESPONSIVA DO DOCK --- */
+
+/* Desktop Layout (Sidebar à Esquerda) */
+@media (min-width: 992px) {
+    body {
+        padding-left: 100px; /* Dá espaço para a barra lateral */
+    }
+
+    .dock-container {
+        left: 24px;
+        top: 50%;
+        transform: translateY(-50%);
+        flex-direction: column;
+        padding: 18px 10px;
+        border-radius: 40px;
+        width: 64px;
+        height: auto;
+    }
+
+    .dock-items {
+        flex-direction: column;
+        gap: 20px;
+        width: 100%;
+        align-items: center;
+    }
+
+    .dock-item {
+        width: 44px;
+        height: 44px;
+        border-radius: 50%;
+    }
+
+    .dock-item::after {
+        left: -8px;
+        top: 50%;
+        transform: translateY(-50%) scale(0);
+        width: 5px;
+        height: 12px;
+        border-radius: 3px;
+    }
+
+    .dock-item.active::after {
+        transform: translateY(-50%) scale(1);
+    }
+
+    .dock-tooltip {
+        left: 75px;
+        top: 50%;
+        transform: translateY(-50%) translateX(-10px);
+    }
+
+    .dock-item:hover .dock-tooltip {
+        opacity: 1;
+        transform: translateY(-50%) translateX(0);
+    }
+
+    /* Divisor no desktop */
+    .dock-item.logout-item {
+        margin-top: 15px;
+    }
+    
+    .dock-item.logout-item::before {
+        content: '';
+        position: absolute;
+        top: -12px;
+        left: 20%;
+        width: 60%;
+        height: 1px;
+        background: var(--glass-border);
+    }
+}
+
+/* Mobile Layout (Barra Horizontal Inferior) */
+@media (max-width: 991px) {
+    body {
+        padding-bottom: 85px; /* Dá espaço para a barra inferior */
+    }
+
+    .dock-container {
+        bottom: 16px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 90%;
+        max-width: 440px;
+        padding: 8px 16px;
+        border-radius: 30px;
+        height: 60px;
+    }
+
+    .dock-items {
+        flex-direction: row;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+    }
+
+    .dock-item {
+        width: 48px;
+        height: 44px;
+        border-radius: 16px;
+    }
+
+    .dock-item::after {
+        bottom: -2px;
+        left: 50%;
+        transform: translateX(-50%) scale(0);
+        width: 12px;
+        height: 4px;
+        border-radius: 2px;
+    }
+
+    .dock-item.active::after {
+        transform: translateX(-50%) scale(1);
+    }
+
+    /* Oculta tooltips no mobile */
+    .dock-tooltip {
+        display: none !important;
+    }
+
+    /* Divisor no mobile */
+    .dock-item.logout-item {
+        margin-left: 10px;
+    }
+    
+    .dock-item.logout-item::before {
+        content: '';
+        position: absolute;
+        left: -8px;
+        top: 20%;
+        height: 60%;
+        width: 1px;
+        background: var(--glass-border);
+    }
+}
+
 
 /* Buttons */
 .btn {
@@ -268,6 +418,10 @@ body {
     display: none;
     padding-top: 100px;
     min-height: 100vh;
+}
+
+#home.page {
+    padding-top: 0;
 }
 
 .page.active {
