@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Barbearia da Baixada | Agendamento Premium</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <!-- PWA Settings -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Barbearia">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
+    <link rel="stylesheet" href="style.css">
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
+</head>
+<body>
+    <div id="loader" class="loader-container">
+        <div class="loader"></div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <header class="top-header">
+        <div class="container header-content">
+            <a href="#" class="logo" onclick="app.showPage('home')">
+                <i class="fas fa-cut"></i> Barbearia da <span>Baixada</span>
+            </a>
+        </div>
+    </header>
+
+    <!-- Dock de NavegaÃ§Ã£o Flutuante -->
+    <nav class="dock-container" id="dock-container">
+        <ul class="dock-items" id="dock-items">
+            <!-- Os itens do menu serÃ£o renderizados dinamicamente via JS -->
+        </ul>
+    </nav>
+
+    <main id="app-container">
+        <!-- Home Page -->
+        <section id="home" class="page active">
+            <header class="hero">
+                <div class="hero-overlay"></div>
+                <div class="container hero-content">
+                    <h1>Sua melhor versÃ£o comeÃ§a aqui.</h1>
+                    <p>Atendimento exclusivo com horÃ¡rio marcado. Qualidade e estilo no coraÃ§Ã£o da baixada.</p>
+                    <div class="hero-btns">
+                        <a href="https://wa.me/5573998376471" class="btn-whatsapp-small" target="_blank"><i class="fab fa-whatsapp"></i> fale conosco atravÃ©s do WhatsApp</a>
+                    </div>
+                </div>
+            </header>
+
+            <section class="features-section glass" style="margin: 100px auto; max-width: 1000px; padding: 60px;">
+                <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
+                    <div class="feature-item">
+                        <i class="fas fa-crown" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Atendimento Premium</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Foco total na sua experiÃªncia e satisfaÃ§Ã£o.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-calendar-check" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Sem Filas</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Respeito total ao seu tempo com horÃ¡rios marcados.</p>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-home" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <h4>Atendimento a DomicÃ­lio</h4>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Atendimento no conforto da sua casa aos domingos.</p>
+                    </div>
+                </div>
+            </section>
+        </section>
+
+        <!-- Services Page -->
+        <section id="services-page" class="page">
+            <section id="services" class="services-section" style="padding-top: 0;">
+                <div class="container">
+                    <h2 class="section-title">Nossos ServiÃ§os</h2>
+                    <div class="services-grid">
+                        <div class="service-card">
+                            <h3>Corte Social</h3>
+                            <p class="price">R$ 20,00 <span>(Seg-SÃ¡b)</span></p>
+                            <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">O clÃ¡ssico que nunca sai de moda. Perfeito para qualquer ocasiÃ£o.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Corte Social')">Agendar Este Corte</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>DegradÃª</h3>
+                            <p class="price">R$ 25,00 <span>(Seg-SÃ¡b)</span></p>
+                            <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
+                            <p class="service-desc">TÃ©cnica moderna com transiÃ§Ã£o suave. O favorito de quem busca estilo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('DegradÃª')">Agendar Este Corte</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Barba</h3>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Barba')">Agendar Barba</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Sobrancelha</h3>
+                            <p class="price">R$ 5,00</p>
+                            <p class="service-desc">O detalhe que abre o olhar e harmoniza o seu rosto.</p>
+
+                                                    <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Sobrancelha')">Agendar Sobrancelha</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>Pezinho</h3>
+                            <p class="price">R$ 10,00</p>
+                            <p class="service-desc">Acabamento impecÃ¡vel nos contornos do cabelo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Pezinho')">Agendar Pezinho</button>
+                        </div>
+                        <div class="service-card specialty">
+                            <h3>Luzes / Platinado</h3>
+                            <p class="price-negotiate">PreÃ§o a combinar</p>
+                            <p class="service-desc">TransformaÃ§Ã£o total para visual de impacto.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Luzes / Platinado')">Agendar Este Corte</button>
+                        </div>
+                        <div class="service-card">
+                            <h3>PigmentaÃ§Ã£o</h3>
+                            <p class="price">A partir de R$ 10,00</p>
+                            <p class="service-desc">Realce a linha do seu cabelo e barba.</p>
+
+                        </div>
+                    </div>
+                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicÃ­lio. Qualquer serviÃ§o realizado neste dia possui um acrÃ©scimo de R$ 5,00.</p>
+                </div>
+            </section>
+        </section>
+
+        <!-- Auth Page (Full) -->
+        <section id="auth" class="page">
+            <div class="container auth-container">
+                <div class="auth-box glass">
+                    <div class="auth-tabs" id="auth-tabs">
+                        <button id="tab-login" class="active" onclick="app.setAuthTab('login')">Entrar</button>
+                        <button id="tab-register" onclick="app.setAuthTab('register')">Cadastrar</button>
+                    </div>
+                    
+                    <form id="login-form">
+                        <h3 id="auth-title">Bem-vindo de volta</h3>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="login-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Senha</label>
+                            <input type="password" id="login-password" required placeholder="â€¢â€¢â€¢â€¢â€¢â€¢â€¢â€¢">
+                        </div>
+                        <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
+                            <a href="#" onclick="app.forgotPassword()" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Esqueci minha senha</a>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Entrar</button>
+                    </form>
+
+                    <form id="register-form" style="display: none;">
+                        <h3>Crie sua conta</h3>
+                        <div class="input-group">
+                            <label>Nome Completo</label>
+                            <input type="text" id="reg-name" required placeholder="Como podemos te chamar?">
+                        </div>
+                        <div class="input-group">
+                            <label>Email</label>
+                            <input type="email" id="reg-email" required placeholder="seu@email.com">
+                        </div>
+                        <div class="input-group">
+                            <label>Senha</label>
+                            <input type="password" id="reg-password" required placeholder="MÃ­nimo 6 caracteres">
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">Cadastrar</button>
+                    </form>
+
+                    <!-- Forgot Password Section -->
+                    <form id="recovery-form" style="display: none;">
+                        <h3>Recuperar Senha</h3>
+                        <div id="recovery-step-1">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+                                Informe seu e-mail cadastrado. Abriremos o Gmail para vocÃª gerar seu cÃ³digo.
+                            </p>
+                            <div class="input-group">
+                                <label>Seu e-mail</label>
+                                <input type="email" id="recovery-email" required placeholder="seu@email.com">
+                            </div>
+                            <button type="button" class="btn btn-primary btn-block" onclick="app.sendRecoveryCode()">Enviar CÃ³digo para Gmail</button>
+                        </div>
+
+                        <div id="recovery-step-2" style="display: none;">
+                            <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 20px;">
+                                Digite abaixo o cÃ³digo de 6 dÃ­gitos que foi gerado no seu Gmail.
+                            </p>
+                            <div class="input-group">
+                                <label>CÃ³digo de confirmaÃ§Ã£o</label>
+                                <input type="text" id="recovery-code-input" required placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
+                            </div>
+                            <button type="button" class="btn btn-primary btn-block" onclick="app.verifyRecoveryCode()">Verificar CÃ³digo</button>
+                        </div>
+                        
+                        <a href="#" onclick="app.setAuthTab('login')" style="display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Voltar ao Login</a>
+                    </form>
+
+                    <p style="margin-top: 25px; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+                        <a href="#" id="barber-toggle-link" onclick="app.toggleBarberMode(true)" style="color: var(--text-muted); text-decoration: none;">Acesso Administrativo</a>
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Booking Page -->
+        <section id="booking" class="page">
+            <div class="container">
+                <div class="booking-grid">
+                    <div class="booking-form glass">
+                        <h2>Marcar Atendimento</h2>
+                        <form id="appointment-form">
+                            <div class="input-group">
+                                <label>ServiÃ§o Principal</label>
+                                <select id="book-service" required onchange="app.updatePricePreview()">
+                                    <option value="Corte Social">Corte Social</option>
+                                    <option value="DegradÃª">DegradÃª</option>
+                                    <option value="Apenas Barba">Apenas Barba</option>
+                                    <option value="Apenas Pezinho">Apenas Pezinho</option>
+                                    <option value="Apenas Sobrancelha">Apenas Sobrancelha</option>
+                                    <option value="Apenas PigmentaÃ§Ã£o">Apenas PigmentaÃ§Ã£o</option>
+                                    <option value="Luzes / Platinado">Luzes / Platinado</option>
+                                </select>
+                            </div>
+                            <div class="checkbox-group">
+                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 10)</label>
+                                <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> + Sobrancelha (R$ 5)</label>
+                                <label><input type="checkbox" id="add-pezinho" onchange="app.updatePricePreview()"> + Pezinho (R$ 10)</label>
+                                <label><input type="checkbox" id="add-pigment" onchange="app.updatePricePreview()"> + PigmentaÃ§Ã£o (R$ 10)</label>
+                            </div>
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="book-date" required onchange="app.handleDateChange()">
+                            </div>
+                            <div class="input-group">
+                                <label>HorÃ¡rio</label>
+                                <select id="book-time" required>
+                                    <option value="09:00">09:00</option>
+                                    <option value="10:00">10:00</option>
+                                    <option value="11:00">11:00</option>
+                                    <option value="14:00">14:00</option>
+                                    <option value="15:00">15:00</option>
+                                    <option value="16:00">16:00</option>
+                                    <option value="17:00">17:00</option>
+                                    <option value="18:00">18:00</option>
+                                    <option value="19:00">19:00</option>
+                                </select>
+                            </div>
+                            <div id="address-container" style="display: none;">
+                                <div class="input-group">
+                                    <label>EndereÃ§o para atendimento (Domingo)</label>
+                                    <textarea id="book-address" placeholder="Rua, nÃºmero, bairro..."></textarea>
+                                </div>
+                            </div>
+                            <div class="price-preview">
+                                Total: <span id="preview-total">R$ 20,00</span>
+                            </div>
+                            <div class="cancellation-policy">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <p>Se o corte for cancelado em atÃ© 3 horas antes do horÃ¡rio marcado ou o cliente nÃ£o comparecer, no prÃ³ximo corte serÃ¡ cobrado 10 reais a mais alÃ©m do valor do corte.</p>
+                            </div>
+                            <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento</button>
+                        </form>
+                    </div>
+                    
+                    <div class="my-appointments glass">
+                        <h2>PrÃ³ximos Agendamentos</h2>
+                        <div id="client-appointments-list">
+                            <p class="empty-msg">VocÃª ainda nÃ£o possui agendamentos.</p>
+                        </div>
+
+                        <h2 style="margin-top: 40px;">Meu HistÃ³rico de Cortes</h2>
+                        <div id="client-history-list">
+                            <!-- Dynamic history -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Barber Dashboard -->
+        <section id="barber-dashboard" class="page">
+            <div class="container">
+                <div class="dashboard-header glass">
+                    <h2>Painel Administrativo</h2>
+                    <p>Gerenciamento completo da sua barbearia.</p>
+                    <div class="stats-grid" style="margin-top: 25px;">
+                        <div class="stat-card glass gold">
+                            <small>Recebido (Hoje)</small>
+                            <h3 id="daily-revenue">R$ 0,00</h3>
+                        </div>
+                        <div class="stat-card glass">
+                            <small>Cortes para Hoje</small>
+                            <h3 id="daily-count">0</h3>
+                        </div>
+                        <div class="stat-card glass" id="license-card">
+                            <small>LicenÃ§a e Suporte</small>
+                            <div id="license-info" style="margin-top: 5px;">
+                                <span class="status-badge status-pago" style="font-size: 0.7rem;">ATIVA</span>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Vencimento: <span id="payment-due-date">--/--/----</span></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="dashboard-tabs">
+                    <button id="tab-agenda" class="active" onclick="app.setBarberTab('agenda')">Agenda da Semana</button>
+                    <button id="tab-wallet" onclick="app.setBarberTab('wallet')">Minha Carteira</button>
+                    <button id="tab-clients" onclick="app.setBarberTab('clients')">Meus Clientes</button>
+                </div>
+
+                <div id="barber-agenda" class="dashboard-content">
+                    <div class="block-time-form glass" style="margin-bottom: 30px; padding: 20px; border: 1px dashed var(--primary);">
+                        <h3>Bloquear HorÃ¡rio Manualmente</h3>
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Use esta opÃ§Ã£o para reservar horÃ¡rios de almoÃ§o ou emergÃªncias.</p>
+                        <div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                            <div class="input-group">
+                                <label>Data</label>
+                                <input type="date" id="block-date">
+                            </div>
+                            <div class="input-group">
+                                <label>Hora de InÃ­cio</label>
+                                <input type="time" id="block-time">
+                            </div>
+                            <div class="input-group">
+                                <label>DuraÃ§Ã£o</label>
+                                <select id="block-duration">
+                                    <option value="30">30 minutos</option>
+                                    <option value="60" selected>1 hora</option>
+                                    <option value="90">1h 30min</option>
+                                    <option value="120">2 horas</option>
+                                </select>
+                            </div>
+                            <div class="input-group" style="grid-column: span 2;">
+                                <label>Motivo (Opcional)</label>
+                                <input type="text" id="block-reason" placeholder="Ex: AlmoÃ§o, ReuniÃ£o...">
+                            </div>
+                            <div class="input-group" style="display: flex; align-items: flex-end;">
+                                <button class="btn btn-primary btn-block" onclick="app.blockTime()">Bloquear HorÃ¡rio</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="table-container glass">
+                        <table id="agenda-table">
+                            <thead>
+                                <tr>
+                                    <th>Ciente</th>
+                                    <th>ServiÃ§o</th>
+                                    <th>Data/Hora</th>
+                                    <th>PreÃ§o</th>
+                                    <th>Status</th>
+                                    <th>AÃ§Ãµes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barber-agenda-body">
+                                <!-- Dynamic content -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div id="barber-clients" class="dashboard-content" style="display: none;">
+                    <div class="table-container glass">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nome</th>
+                                    <th>E-mail</th>
+                                    <th>AÃ§Ãµes</th>
+                                </tr>
+                            </thead>
+                            <tbody id="barber-clients-body">
+                                <!-- Dynamic clients list -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="barber-wallet" class="dashboard-content" style="display: none;">
+                    <div class="wallet-grid">
+                        <div class="wallet-stats glass">
+                            <h3>Resumo de Hoje</h3>
+                            <div class="wallet-stat-row">
+                                <span>Total Recebido:</span>
+                                <strong id="wallet-today-money">R$ 0,00</strong>
+                            </div>
+                            <div class="wallet-stat-row">
+                                <span>Cortes Realizados:</span>
+                                <strong id="wallet-today-cuts">0</strong>
+                            </div>
+                            <div class="wallet-stat-row">
+                                <span>Pagamentos via PIX:</span>
+                                <strong id="wallet-today-pix">0</strong>
+                            </div>
+                        </div>
+                        
+                        <div class="wallet-pix-info glass">
+                            <h3>Minha Chave PIX</h3>
+                            <p>Esta Ã© a chave exibida para os clientes no momento do pagamento.</p>
+                            <div class="input-group">
+                                <input type="text" id="barber-pix-key-input" value="09613543562" onchange="app.updateBarberPixKey()">
+                                <small>Altere aqui para atualizar a chave para os clientes.</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="finance-history glass" style="margin-top: 20px;">
+                        <h3>GestÃ£o de NotificaÃ§Ãµes</h3>
+                        <div class="notification-settings glass" style="background: rgba(255, 255, 255, 0.02); margin-top: 15px; padding: 20px;">
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Defina quando os lembretes automÃ¡ticos devem ser enviados aos clientes.</p>
+                            <div class="checkbox-group" style="flex-direction: column; gap: 10px;">
+                                <label><input type="checkbox" id="notify-24h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 24 horas antes</label>
+                                <label><input type="checkbox" id="notify-2h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 2 hora antes</label>
+                            </div>
+                            <div id="notification-log" style="margin-top: 20px; font-size: 0.75rem; color: var(--primary); font-family: monospace;">
+                                <!-- Notification logs -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="finance-history glass" style="margin-top: 20px;">
+                        <h3>HistÃ³rico de Recebimentos por Dia</h3>
+                        <div id="finance-list" class="finance-list">
+                            <!-- Dynamic content -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Modal -->
+        <div id="payment-modal" class="modal-overlay" style="display: none;">
+            <div class="modal-content glass">
+                <button class="modal-close" onclick="app.closePayment()">&times;</button>
+                <h3>Finalizar Pagamento</h3>
+                <div class="payment-details">
+                    <p>Valor total: <strong id="pay-total">R$ 0,00</strong></p>
+                    <div class="pix-area">
+                        <p>Pagamento via <strong>PIX</strong></p>
+                        <div class="qr-container" style="background: white; padding: 15px; border-radius: 12px; margin: 20px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <img src="pix_qr_code.jpg" alt="PIX QR Code" style="width: 200px; height: 200px; display: block;">
+                        </div>
+                        <div class="copy-paste">
+                            <input type="text" id="pix-key" value="09613543562" readonly>
+                            <button onclick="app.copyPix()"><i class="fas fa-copy"></i></button>
+                        </div>
+                    </div>
+                    <p class="payment-note">ApÃ³s realizar a transferÃªncia, clique no botÃ£o abaixo e <strong>envie o comprovante pelo WhatsApp</strong>.</p>
+                    <button class="btn btn-primary btn-block" onclick="app.confirmPayment()">JÃ¡ realizei o pagamento</button>
+                    <p class="payment-note" style="margin-top: 10px; font-size: 0.7rem;">* Em ambiente de produÃ§Ã£o, este pagamento seria verificado automaticamente.</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2026 Barbearia da Baixada. Todos os direitos reservados.</p>
+            <div class="footer-contact" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
+                <a href="https://instagram.com/viniiobarber.ofc" target="_blank"><i class="fab fa-instagram"></i> @viniiobarber.ofc</a>
+                <a href="https://instagram.com/viniciius_s0uza" target="_blank"><i class="fab fa-instagram"></i> @viniciius_s0uza</a>
+                <span class="watermark">quer um site como esse? entre em contato conosco pelo instagram <a href="https://instagram.com/maick.bjj_" target="_blank">@maick.bjj_</a></span>
+                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Fale Conosco pelo WhatsApp</a>
+            </div>
+        </div>
+    </footer>
+
+
+
+    
+    <script src="app.js"></script>
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((reg) => console.log('Service Worker registrado com sucesso:', reg))
+                    .catch((err) => console.log('Erro ao registrar Service Worker:', err));
+            });
+        }
+    </script>
+</body>
+</html>
