@@ -1,27 +1,42 @@
 <!DOCTYPE html>
-<html lang="pt-br">
+<html lang="pt-BR">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Barbearia da Baixada | Agendamento Premium</title>
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
-    <!-- Font Awesome for icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer">
+    <meta name="description"
+        content="Barbearia da Baixada – Atendimento exclusivo com horário marcado. Qualidade e estilo no coração da baixada. Agende online seu corte ou barba.">
+
+    <!-- Favicon & PWA Icons -->
+    <link rel="icon" type="image/png" href="icons/icon-192.png">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+
     <!-- PWA Settings -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0a0a0a">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Barbearia">
-    <link rel="apple-touch-icon" href="icons/icon-192.png">
 
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800&family=Playfair+Display:wght@700&display=swap"
+        rel="stylesheet">
+
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer">
+
+    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
+
     <!-- Supabase SDK -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2" crossorigin="anonymous"></script>
 </head>
+
 <body>
     <div id="loader" class="loader-container">
         <div class="loader"></div>
@@ -48,32 +63,124 @@
         <!-- Home Page -->
         <section id="home" class="page active">
             <header class="hero">
+                <!-- Innovative Multi-Layer Ambient Background Canvas -->
+                <div class="hero-bg-canvas">
+                    <div class="ambient-glow glow-1"></div>
+                    <div class="ambient-glow glow-2"></div>
+                    <div class="ambient-glow glow-3"></div>
+                    <div class="luxury-grid-pattern"></div>
+
+                    <!-- Authentic Barber Emblem Vector Watermark -->
+                    <div class="barber-emblem-watermark" aria-hidden="true">
+                        <svg viewBox="0 0 500 500" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="250" cy="250" r="230" stroke="url(#goldGrad)" stroke-width="1.5" stroke-dasharray="6 6" opacity="0.4"/>
+                            <circle cx="250" cy="250" r="212" stroke="url(#goldGrad)" stroke-width="1.5" opacity="0.6"/>
+                            <circle cx="250" cy="250" r="196" stroke="url(#goldGrad)" stroke-width="1" opacity="0.3"/>
+                            
+                            <!-- Crossed Straight Razor & Shears -->
+                            <path d="M160 340 L220 250 L205 235 L145 325 Z" fill="url(#goldGrad)" opacity="0.6"/>
+                            <path d="M220 250 L310 130 C320 115 340 125 330 140 L250 250 Z" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
+                            <path d="M340 340 L270 250 L285 235 L355 325 Z" fill="url(#goldGrad)" opacity="0.6"/>
+                            <circle cx="360" cy="350" r="20" stroke="url(#goldGrad)" stroke-width="3" fill="none" opacity="0.6"/>
+                            <circle cx="140" cy="350" r="20" stroke="url(#goldGrad)" stroke-width="3" fill="none" opacity="0.6"/>
+                            <path d="M270 250 L190 130 C180 115 160 125 170 140 L240 250 Z" stroke="url(#goldGrad)" stroke-width="2.5" fill="none" opacity="0.7"/>
+                            
+                            <!-- Authentic Center Crown Star -->
+                            <path d="M250 170 L258 190 L280 190 L262 203 L268 224 L250 211 L232 224 L238 203 L220 190 L242 190 Z" fill="url(#goldGrad)" opacity="0.8"/>
+                            <path d="M120 270 Q250 310 380 270" stroke="url(#goldGrad)" stroke-width="2" fill="none" opacity="0.5"/>
+                            <defs>
+                                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" stop-color="#FFF0B8"/>
+                                    <stop offset="50%" stop-color="#D4AF37"/>
+                                    <stop offset="100%" stop-color="#8C6D1F"/>
+                                </linearGradient>
+                            </defs>
+                        </svg>
+                    </div>
+
+                    <!-- Floating Ambient Particles (Embers/Gold Dust) -->
+                    <div class="particles-layer" aria-hidden="true">
+                        <span class="particle p-1"></span>
+                        <span class="particle p-2"></span>
+                        <span class="particle p-3"></span>
+                        <span class="particle p-4"></span>
+                        <span class="particle p-5"></span>
+                        <span class="particle p-6"></span>
+                    </div>
+                </div>
+
                 <div class="hero-overlay"></div>
+
                 <div class="container hero-content">
-                    <h1>Sua melhor versão começa aqui.</h1>
-                    <p>Atendimento exclusivo com horário marcado. Qualidade e estilo no coração da baixada.</p>
+                    <div class="hero-badge">
+                        <span class="badge-dot"></span>
+                        <span class="badge-text">Barbearia da Baixada • Atendimento Exclusivo</span>
+                    </div>
+                    
+                    <h1 class="hero-title">Sua melhor versão <span class="gold-gradient-text">começa aqui.</span></h1>
+                    <p class="hero-subtitle">Cortes impecáveis, design de barba de alta precisão e atendimento pontual no coração da baixada.</p>
+                    
                     <div class="hero-btns">
-                        <a href="https://wa.me/5573998376471" class="btn-whatsapp-small" target="_blank"><i class="fab fa-whatsapp"></i> fale conosco através do WhatsApp</a>
+                        <button class="btn btn-hero-primary" onclick="app.showPage('booking')">
+                            <i class="fas fa-calendar-check"></i> Agendar Horário
+                        </button>
+                        <a href="https://wa.me/5573998376471" class="btn btn-hero-whatsapp" target="_blank">
+                            <i class="fab fa-whatsapp"></i> Fale no WhatsApp
+                        </a>
+                    </div>
+
+                    <!-- Trust Bar (Organized Metrics) -->
+                    <div class="hero-trust-bar">
+                        <div class="trust-item">
+                            <i class="fas fa-clock"></i>
+                            <div>
+                                <strong>Sem Filas</strong>
+                                <span>Horário marcado</span>
+                            </div>
+                        </div>
+                        <div class="trust-divider"></div>
+                        <div class="trust-item">
+                            <i class="fas fa-star"></i>
+                            <div>
+                                <strong>4.9 de Avaliação</strong>
+                                <span>Satisfação garantida</span>
+                            </div>
+                        </div>
+                        <div class="trust-divider"></div>
+                        <div class="trust-item">
+                            <i class="fas fa-award"></i>
+                            <div>
+                                <strong>Alta Precisão</strong>
+                                <span>Estilo sob medida</span>
+                            </div>
+                        </div>
                     </div>
                 </div>
             </header>
 
             <section class="features-section glass" style="margin: 100px auto; max-width: 1000px; padding: 60px;">
-                <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
+                <div class="features-grid"
+                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; text-align: center;">
                     <div class="feature-item">
-                        <i class="fas fa-crown" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <i class="fas fa-crown"
+                            style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
                         <h4>Atendimento Premium</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">Foco total na sua experiência e satisfação.</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Foco total na sua experiência e
+                            satisfação.</p>
                     </div>
                     <div class="feature-item">
-                        <i class="fas fa-calendar-check" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <i class="fas fa-calendar-check"
+                            style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
                         <h4>Sem Filas</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">Respeito total ao seu tempo com horários marcados.</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Respeito total ao seu tempo com horários
+                            marcados.</p>
                     </div>
                     <div class="feature-item">
-                        <i class="fas fa-home" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
+                        <i class="fas fa-home"
+                            style="font-size: 2.5rem; color: var(--primary); margin-bottom: 20px;"></i>
                         <h4>Atendimento a Domicílio</h4>
-                        <p style="font-size: 0.9rem; color: var(--text-muted);">Atendimento no conforto da sua casa aos domingos.</p>
+                        <p style="font-size: 0.9rem; color: var(--text-muted);">Atendimento no conforto da sua casa aos
+                            domingos.</p>
                     </div>
                 </div>
             </section>
@@ -89,40 +196,49 @@
                             <h3>Corte Social</h3>
                             <p class="price">R$ 20,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 25,00 <span>(Domingo)</span></p>
-                            <p class="service-desc">O clássico que nunca sai de moda. Perfeito para qualquer ocasião.</p>
-                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Corte Social')">Agendar Este Corte</button>
+                            <p class="service-desc">O clássico que nunca sai de moda. Perfeito para qualquer ocasião.
+                            </p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Corte Social')">Agendar Este Corte</button>
                         </div>
                         <div class="service-card">
                             <h3>Degradê</h3>
                             <p class="price">R$ 25,00 <span>(Seg-Sáb)</span></p>
                             <p class="price-sun">R$ 30,00 <span>(Domingo)</span></p>
-                            <p class="service-desc">Técnica moderna com transição suave. O favorito de quem busca estilo.</p>
-                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Degradê')">Agendar Este Corte</button>
+                            <p class="service-desc">Técnica moderna com transição suave. O favorito de quem busca
+                                estilo.</p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Degradê')">Agendar Este Corte</button>
                         </div>
                         <div class="service-card">
                             <h3>Barba</h3>
                             <p class="price">A partir de R$ 10,00</p>
-                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.</p>
-                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Barba')">Agendar Barba</button>
+                            <p class="service-desc">Tratamento completo para sua barba. Maciez, alinhamento e estilo.
+                            </p>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Apenas Barba')">Agendar Barba</button>
                         </div>
                         <div class="service-card">
                             <h3>Sobrancelha</h3>
                             <p class="price">R$ 5,00</p>
                             <p class="service-desc">O detalhe que abre o olhar e harmoniza o seu rosto.</p>
 
-                                                    <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Sobrancelha')">Agendar Sobrancelha</button>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Apenas Sobrancelha')">Agendar Sobrancelha</button>
                         </div>
                         <div class="service-card">
                             <h3>Pezinho</h3>
                             <p class="price">R$ 10,00</p>
                             <p class="service-desc">Acabamento impecável nos contornos do cabelo.</p>
-                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Apenas Pezinho')">Agendar Pezinho</button>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Apenas Pezinho')">Agendar Pezinho</button>
                         </div>
                         <div class="service-card specialty">
                             <h3>Luzes / Platinado</h3>
                             <p class="price-negotiate">Preço a combinar</p>
                             <p class="service-desc">Transformação total para visual de impacto.</p>
-                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;" onclick="app.preSelectService('Luzes / Platinado')">Agendar Este Corte</button>
+                            <button class="btn btn-outline" style="margin-top: 15px; width: 100%;"
+                                onclick="app.preSelectService('Luzes / Platinado')">Agendar Este Corte</button>
                         </div>
                         <div class="service-card">
                             <h3>Pigmentação</h3>
@@ -131,7 +247,8 @@
 
                         </div>
                     </div>
-                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado neste dia possui um acréscimo de R$ 5,00.</p>
+                    <p class="sunday-alert">* Domingos atendemos exclusivamente a domicílio. Qualquer serviço realizado
+                        neste dia possui um acréscimo de R$ 5,00.</p>
                 </div>
             </section>
         </section>
@@ -144,7 +261,7 @@
                         <button id="tab-login" class="active" onclick="app.setAuthTab('login')">Entrar</button>
                         <button id="tab-register" onclick="app.setAuthTab('register')">Cadastrar</button>
                     </div>
-                    
+
                     <form id="login-form">
                         <h3 id="auth-title">Bem-vindo de volta</h3>
                         <div class="input-group">
@@ -156,7 +273,9 @@
                             <input type="password" id="login-password" required placeholder="••••••••">
                         </div>
                         <div style="text-align: right; margin-top: -10px; margin-bottom: 20px;">
-                            <a href="#" onclick="app.forgotPassword()" style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Esqueci minha senha</a>
+                            <a href="#" onclick="app.forgotPassword()"
+                                style="color: var(--text-muted); font-size: 0.8rem; text-decoration: none;">Esqueci
+                                minha senha</a>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block">Entrar</button>
                     </form>
@@ -189,7 +308,8 @@
                                 <label>Seu e-mail</label>
                                 <input type="email" id="recovery-email" required placeholder="seu@email.com">
                             </div>
-                            <button type="button" class="btn btn-primary btn-block" onclick="app.sendRecoveryCode()">Enviar Código para Gmail</button>
+                            <button type="button" class="btn btn-primary btn-block"
+                                onclick="app.sendRecoveryCode()">Enviar Código para Gmail</button>
                         </div>
 
                         <div id="recovery-step-2" style="display: none;">
@@ -198,16 +318,22 @@
                             </p>
                             <div class="input-group">
                                 <label>Código de confirmação</label>
-                                <input type="text" id="recovery-code-input" required placeholder="000000" maxlength="6" style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
+                                <input type="text" id="recovery-code-input" required placeholder="000000" maxlength="6"
+                                    style="text-align: center; font-size: 1.5rem; letter-spacing: 5px;">
                             </div>
-                            <button type="button" class="btn btn-primary btn-block" onclick="app.verifyRecoveryCode()">Verificar Código</button>
+                            <button type="button" class="btn btn-primary btn-block"
+                                onclick="app.verifyRecoveryCode()">Verificar Código</button>
                         </div>
-                        
-                        <a href="#" onclick="app.setAuthTab('login')" style="display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Voltar ao Login</a>
+
+                        <a href="#" onclick="app.setAuthTab('login')"
+                            style="display: block; text-align: center; margin-top: 20px; color: var(--text-muted); text-decoration: none; font-size: 0.8rem;">Voltar
+                            ao Login</a>
                     </form>
 
-                    <p style="margin-top: 25px; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 15px;">
-                        <a href="#" id="barber-toggle-link" onclick="app.toggleBarberMode(true)" style="color: var(--text-muted); text-decoration: none;">Acesso Administrativo</a>
+                    <p
+                        style="margin-top: 25px; text-align: center; font-size: 0.8rem; border-top: 1px solid var(--glass-border); padding-top: 15px;">
+                        <a href="#" id="barber-toggle-link" onclick="app.toggleBarberMode(true)"
+                            style="color: var(--text-muted); text-decoration: none;">Acesso Administrativo</a>
                     </p>
                 </div>
             </div>
@@ -233,10 +359,14 @@
                                 </select>
                             </div>
                             <div class="checkbox-group">
-                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> + Barba (R$ 10)</label>
-                                <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> + Sobrancelha (R$ 5)</label>
-                                <label><input type="checkbox" id="add-pezinho" onchange="app.updatePricePreview()"> + Pezinho (R$ 10)</label>
-                                <label><input type="checkbox" id="add-pigment" onchange="app.updatePricePreview()"> + Pigmentação (R$ 10)</label>
+                                <label><input type="checkbox" id="add-beard" onchange="app.updatePricePreview()"> +
+                                    Barba (R$ 10)</label>
+                                <label><input type="checkbox" id="add-eyebrow" onchange="app.updatePricePreview()"> +
+                                    Sobrancelha (R$ 5)</label>
+                                <label><input type="checkbox" id="add-pezinho" onchange="app.updatePricePreview()"> +
+                                    Pezinho (R$ 10)</label>
+                                <label><input type="checkbox" id="add-pigment" onchange="app.updatePricePreview()"> +
+                                    Pigmentação (R$ 10)</label>
                             </div>
                             <div class="input-group">
                                 <label>Data</label>
@@ -267,12 +397,14 @@
                             </div>
                             <div class="cancellation-policy">
                                 <i class="fas fa-exclamation-triangle"></i>
-                                <p>Se o corte for cancelado em até 3 horas antes do horário marcado ou o cliente não comparecer, no próximo corte será cobrado 10 reais a mais além do valor do corte.</p>
+                                <p>Se o corte for cancelado em até 3 horas antes do horário marcado ou o cliente não
+                                    comparecer, no próximo corte será cobrado 10 reais a mais além do valor do corte.
+                                </p>
                             </div>
                             <button type="submit" class="btn btn-primary btn-block">Confirmar Agendamento</button>
                         </form>
                     </div>
-                    
+
                     <div class="my-appointments glass">
                         <h2>Próximos Agendamentos</h2>
                         <div id="client-appointments-list">
@@ -307,23 +439,28 @@
                             <small>Licença e Suporte</small>
                             <div id="license-info" style="margin-top: 5px;">
                                 <span class="status-badge status-pago" style="font-size: 0.7rem;">ATIVA</span>
-                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Vencimento: <span id="payment-due-date">--/--/----</span></p>
+                                <p style="font-size: 0.75rem; color: var(--text-muted); margin-top: 5px;">Vencimento:
+                                    <span id="payment-due-date">--/--/----</span></p>
                             </div>
                         </div>
                     </div>
                 </div>
 
                 <div class="dashboard-tabs">
-                    <button id="tab-agenda" class="active" onclick="app.setBarberTab('agenda')">Agenda da Semana</button>
+                    <button id="tab-agenda" class="active" onclick="app.setBarberTab('agenda')">Agenda da
+                        Semana</button>
                     <button id="tab-wallet" onclick="app.setBarberTab('wallet')">Minha Carteira</button>
                     <button id="tab-clients" onclick="app.setBarberTab('clients')">Meus Clientes</button>
                 </div>
 
                 <div id="barber-agenda" class="dashboard-content">
-                    <div class="block-time-form glass" style="margin-bottom: 30px; padding: 20px; border: 1px dashed var(--primary);">
+                    <div class="block-time-form glass"
+                        style="margin-bottom: 30px; padding: 20px; border: 1px dashed var(--primary);">
                         <h3>Bloquear Horário Manualmente</h3>
-                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Use esta opção para reservar horários de almoço ou emergências.</p>
-                        <div class="grid-3" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
+                        <p style="font-size: 0.8rem; color: var(--text-muted); margin-bottom: 15px;">Use esta opção para
+                            reservar horários de almoço ou emergências.</p>
+                        <div class="grid-3"
+                            style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px;">
                             <div class="input-group">
                                 <label>Data</label>
                                 <input type="date" id="block-date">
@@ -346,7 +483,8 @@
                                 <input type="text" id="block-reason" placeholder="Ex: Almoço, Reunião...">
                             </div>
                             <div class="input-group" style="display: flex; align-items: flex-end;">
-                                <button class="btn btn-primary btn-block" onclick="app.blockTime()">Bloquear Horário</button>
+                                <button class="btn btn-primary btn-block" onclick="app.blockTime()">Bloquear
+                                    Horário</button>
                             </div>
                         </div>
                     </div>
@@ -355,7 +493,7 @@
                         <table id="agenda-table">
                             <thead>
                                 <tr>
-                                    <th>Ciente</th>
+                                    <th>Cliente</th>
                                     <th>Serviço</th>
                                     <th>Data/Hora</th>
                                     <th>Preço</th>
@@ -403,12 +541,13 @@
                                 <strong id="wallet-today-pix">0</strong>
                             </div>
                         </div>
-                        
+
                         <div class="wallet-pix-info glass">
                             <h3>Minha Chave PIX</h3>
                             <p>Esta é a chave exibida para os clientes no momento do pagamento.</p>
                             <div class="input-group">
-                                <input type="text" id="barber-pix-key-input" value="09613543562" onchange="app.updateBarberPixKey()">
+                                <input type="text" id="barber-pix-key-input" value="09613543562"
+                                    onchange="app.updateBarberPixKey()">
                                 <small>Altere aqui para atualizar a chave para os clientes.</small>
                             </div>
                         </div>
@@ -416,13 +555,19 @@
 
                     <div class="finance-history glass" style="margin-top: 20px;">
                         <h3>Gestão de Notificações</h3>
-                        <div class="notification-settings glass" style="background: rgba(255, 255, 255, 0.02); margin-top: 15px; padding: 20px;">
-                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Defina quando os lembretes automáticos devem ser enviados aos clientes.</p>
+                        <div class="notification-settings glass"
+                            style="background: rgba(255, 255, 255, 0.02); margin-top: 15px; padding: 20px;">
+                            <p style="font-size: 0.9rem; color: var(--text-muted); margin-bottom: 15px;">Defina quando
+                                os lembretes automáticos devem ser enviados aos clientes.</p>
                             <div class="checkbox-group" style="flex-direction: column; gap: 10px;">
-                                <label><input type="checkbox" id="notify-24h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 24 horas antes</label>
-                                <label><input type="checkbox" id="notify-2h" checked onchange="app.saveNotificationSettings()"> Enviar lembrete 2 hora antes</label>
+                                <label><input type="checkbox" id="notify-24h" checked
+                                        onchange="app.saveNotificationSettings()"> Enviar lembrete 24 horas
+                                    antes</label>
+                                <label><input type="checkbox" id="notify-2h" checked
+                                        onchange="app.saveNotificationSettings()"> Enviar lembrete 2 hora antes</label>
                             </div>
-                            <div id="notification-log" style="margin-top: 20px; font-size: 0.75rem; color: var(--primary); font-family: monospace;">
+                            <div id="notification-log"
+                                style="margin-top: 20px; font-size: 0.75rem; color: var(--primary); font-family: monospace;">
                                 <!-- Notification logs -->
                             </div>
                         </div>
@@ -447,17 +592,22 @@
                     <p>Valor total: <strong id="pay-total">R$ 0,00</strong></p>
                     <div class="pix-area">
                         <p>Pagamento via <strong>PIX</strong></p>
-                        <div class="qr-container" style="background: white; padding: 15px; border-radius: 12px; margin: 20px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
-                            <img src="pix_qr_code.jpg" alt="PIX QR Code" style="width: 200px; height: 200px; display: block;">
+                        <div class="qr-container"
+                            style="background: white; padding: 15px; border-radius: 12px; margin: 20px auto; width: fit-content; box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                            <img src="pix_qr_code.jpg" alt="PIX QR Code"
+                                style="width: 200px; height: 200px; display: block;">
                         </div>
                         <div class="copy-paste">
                             <input type="text" id="pix-key" value="09613543562" readonly>
                             <button onclick="app.copyPix()"><i class="fas fa-copy"></i></button>
                         </div>
                     </div>
-                    <p class="payment-note">Após realizar a transferência, clique no botão abaixo e <strong>envie o comprovante pelo WhatsApp</strong>.</p>
-                    <button class="btn btn-primary btn-block" onclick="app.confirmPayment()">Já realizei o pagamento</button>
-                    <p class="payment-note" style="margin-top: 10px; font-size: 0.7rem;">* Em ambiente de produção, este pagamento seria verificado automaticamente.</p>
+                    <p class="payment-note">Após realizar a transferência, clique no botão abaixo e <strong>envie o
+                            comprovante pelo WhatsApp</strong>.</p>
+                    <button class="btn btn-primary btn-block" onclick="app.confirmPayment()">Já realizei o
+                        pagamento</button>
+                    <p class="payment-note" style="margin-top: 10px; font-size: 0.7rem;">* Em ambiente de produção, este
+                        pagamento seria verificado automaticamente.</p>
                 </div>
             </div>
         </div>
@@ -467,17 +617,18 @@
         <div class="container">
             <p>&copy; 2026 Barbearia da Baixada. Todos os direitos reservados.</p>
             <div class="footer-contact" style="display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;">
-                <a href="https://instagram.com/viniiobarber.ofc" target="_blank"><i class="fab fa-instagram"></i> @viniiobarber.ofc</a>
-                <a href="https://instagram.com/viniciius_s0uza" target="_blank"><i class="fab fa-instagram"></i> @viniciius_s0uza</a>
-                <span class="watermark">quer um site como esse? entre em contato conosco pelo instagram <a href="https://instagram.com/maick.bjj_" target="_blank">@maick.bjj_</a></span>
-                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Fale Conosco pelo WhatsApp</a>
+                <a href="https://instagram.com/viniiobarber.ofc" target="_blank"><i class="fab fa-instagram"></i>
+                    @viniiobarber.ofc</a>
+                <a href="https://instagram.com/viniciius_s0uza" target="_blank"><i class="fab fa-instagram"></i>
+                    @viniciius_s0uza</a>
+                <span class="watermark">quer um site como esse? entre em contato conosco pelo instagram <a
+                        href="https://instagram.com/maick.bjj_" target="_blank">@maick.bjj_</a></span>
+                <a href="https://wa.me/5573998376471" target="_blank"><i class="fab fa-whatsapp"></i> Fale Conosco pelo
+                    WhatsApp</a>
             </div>
         </div>
     </footer>
 
-
-
-    
     <script src="app.js"></script>
     <script>
         if ('serviceWorker' in navigator) {
@@ -489,4 +640,5 @@
         }
     </script>
 </body>
+
 </html>
